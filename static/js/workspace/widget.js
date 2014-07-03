@@ -1,78 +1,8 @@
-function validateChartParameter(p) {
-  if (p.title == undefined)
-    (p.title = "")
-  if (p.color == undefined)
-    (p.color = "steelblue")
-
-  return p
-}
-
-function displayChart(chart) {
-  var p = validateChartParameter(chart.p);
-
-  $("#containment-wrapper").append("<div class='chart-container ui-widget-content draggable'><div class='chart-title'></div><div id='y_axis'></div><div id='chart' class='chart'></div><div id='x_axis'></div></div>")
-  var chartData = []
-
-
-  $(chart.y).each(function(i) {
-    chartData.push({
-      x: chart.x[i],
-      y: chart.y[i]
-    });
-  });
-
-  var format = function(n) {
-    return n.toFixed(2);
-  }
-
-  var graph = new Rickshaw.Graph({
-    element: document.querySelector("#chart"),
-    renderer: 'lineplot',
-    height: 250,
-    width: 300,
-    series: [{
-      color: p.color,
-      data: chartData,
-      name: 'y'
-    }]
-  });
-
-  var x_ticks = new Rickshaw.Graph.Axis.X({
-    graph: graph,
-    grid: false,
-    orientation: 'bottom',
-    element: document.getElementById('x_axis'),
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT
-  });
-
-  var y_ticks = new Rickshaw.Graph.Axis.Y({
-    graph: graph,
-    grid: false,
-    scale: chart.y,
-    orientation: 'left',
-    tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-    element: document.getElementById('y_axis'),
-  });
-
-
-  var hoverDetail = new Rickshaw.Graph.HoverDetail({
-    graph: graph,
-    formatter: function(series, x, y) {
-      var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-      var content = swatch + series.name + ": " + (y) + '<br>';
-      return content;
-    }
-  });
-  graph.render();
-  $(".chart-title").html(p.title);
-}
-
-
 function displayData(data) {
   if (data.parse !== undefined) {
     updateEditorText()
     if (data.eval.statut == "ok") {
-      displayResult(data.parse, data.eval.res);
+      displayWidgetFactory(data.parse, data.eval.res);
     } else if (data.statut == 'tko') {
       displayBadEval(data.eval);
     } else if (data.statut == 'ko') {
@@ -98,112 +28,51 @@ function displayBadEval(data) {
   $("#containment-wrapper").html(html);
 }
 
-function displayResult(parse, data) {
+
+
+function displayWidgetFactory(parse, data) {
   var html = "";
   $("#containment-wrapper").html(html);
   $(data).each(function(id, d) {
     if (this instanceof Array) {
-      var table = validateTableWithArray(this);
-      displayOneTable(parse, table, id);
-    }
-    if (this.type == 'graph') {
-      displayChart(this);
+      displayOneTable(Table.fromArray(parse, this, id));
     }
     if (this.type == 'table') {
-      displayOneTable(parse, this, id);
+      displayOneTable(Table.fromNative(parse, this, id));
+    }
+    if (this.type == 'graph') {
+      displayChart(Chart.fromNative(this));
     }
   })
-
 
   setWidget();
   $('#invisible-wrapper').css("visibility", "hidden");
 
 }
 
-function validateTableWithArray(data) {
-  var table = {
-    data: data,
-    p: {
-      col: []
-    }
-  }
-  $.each(table.data, function(i, col) {
-    table.p.col = true;
+function displayChart(chart) {
+
+  $("#containment-wrapper").append("<div class='chart-container ui-widget-content draggable'><div class='chart-title'></div><div id='y_axis'></div><div id='chart' class='chart'></div><div id='x_axis'></div></div>")
+
+  var graph = Rickshaw_fabric(chart, {
+    chart: document.querySelector("#chart"),
+    x_axis: document.querySelector("#x_axis"),
+    y_axis: document.querySelector("#y_axis")
   });
-  return table;
+  graph.render();
+  $(".chart-title").html(chart.param.title);
 }
 
 
-function displayOneTable(parse, table, id) {
+function displayOneTable(table) {
   $("#containment-wrapper").append("<div class='table-container ui-widget-content draggable'><div class='handsontable-wrapper'></div<</div>")
-
-
-  var widthTable = Math.min(75 * table.data[0].length, 750);
-
-  $('#containment-wrapper div').last().outerWidth(widthTable);
+  $('#containment-wrapper div').last().outerWidth(table.width);
+  var handsontable = new HDT_fabric(table)
   var tableAdd = $('#containment-wrapper div.handsontable-wrapper').last()
-
-  tableAdd.handsontable({
-    data: table.data,
-    colHeaders: table.p.col == null ? true : table.p.col,
-    minSpareRows: 1,
-    contextMenu: true,
-    stretchH: 'all',
-    width: widthTable,
-    cells: function(row, col, prop) {
-      var cellProperties = {};
-      cellProperties.readOnly = isColReadOnly(row, col, parse, id);
-      return cellProperties;
-    },
-    afterChange: function(hooks) {
-      var table = this
-      if (hooks != null) {
-        hooks.forEach(function(hook, i) {
-          table.getDataAtCol(hook[1])
-
-
-          if (!(hook[3] == null || hook[3] == "" && table.getDataAtCol(hook[1]).length - 1 == hook[0])) {
-            for (var i = 0; i < hook[0]; i++) {
-              if (table.getDataAtCell(i, hook[1]) == null && i < table.countRows() - 1) {
-                table.setDataAtCell(i, hook[1], "")
-              }
-            }
-
-            changeValue({
-              'row': hook[0],
-              'col': hook[1],
-              'old': hook[2],
-              'new': hook[3]
-            }, parse, id);
-            updateEditorText()
-          }
-          var cells = table.getDataAtRow(table.countRows() - 1);
-          cells.forEach(function(val, i) {
-            if (val == "") {
-              table.setDataAtCell(table.countRows() - 1, i, null)
-            }
-          })
-
-        })
-      }
-    },
-    afterRemoveRow: function(hook) {
-
-      var gt = hook >= this.countRows()
-
-      var rowToDelete = gt ? hook : hook
-      removeRow(rowToDelete, parse, id);
-      updateEditorText()
-    }
-
-  });
-
-};
-
-function updateEditorText() {
-  editor.getDoc().setValue(eqWrapper.toStr());
-  editor.save();
+  tableAdd.handsontable(handsontable.options);
 }
+
+
 
 function displayCells(col) {
   var html = '<tr style="width: 20px;">'
@@ -219,6 +88,14 @@ function displayOneCol(col) {
   var html = '<th style="width: 20px;">' + col + '<i class="hidden fa fa-sort-asc pull-right" ></th>'
   return html
 };
+
+
+
+function updateEditorText() {
+  editor.getDoc().setValue(eqWrapper.toStr());
+  editor.save();
+}
+
 
 function setWidget() {
   setDraggableWidget();
