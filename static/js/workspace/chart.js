@@ -1,3 +1,4 @@
+define([],function(){
 function Chart(chart) {
 	this.x = chart.x
 	this.y = chart.y
@@ -26,3 +27,5 @@ function Chart(chart) {
 Chart.fromNative = function(chart) {
 	return new Chart(chart);
 }
+return {Chart:Chart}
+})

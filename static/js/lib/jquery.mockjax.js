@@ -11,6 +11,8 @@
  * Dual licensed under the MIT or GPL licenses.
  * http://appendto.com/open-source-licenses
  */
+ define(["jquery"], function($)
+{
 (function($) {
 	var _ajax = $.ajax,
 		mockHandlers = [],
@@ -596,3 +598,4 @@
 		return mockedAjaxCalls;
 	};
 })(jQuery);
+});

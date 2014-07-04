@@ -1,3 +1,9 @@
+define([
+  "./eqobj",
+], function(eqobj) {
+
+
+
 function Table(parse, table, id) {
 	this.data = table.data
 	this.param = table.p
@@ -6,16 +12,16 @@ function Table(parse, table, id) {
 	this.width = Math.min(75 * table.data[0].length, 750)
 	this.cells = function(row, col, prop) {
 		var cellProperties = {};
-		cellProperties.readOnly = isColReadOnly(row, col, parse, id);
+		cellProperties.readOnly = eqobj.isColReadOnly(row, col, parse, id);
 		return cellProperties;
 	}
 	this.event = {
 		afterChange: function(hook) {
-			changeValue(hook, parse, id);
+			eqobj.changeValue(hook, parse, id);
 		},
 
 		afterRemoveRow: function(rowToDelete) {
-			removeRow(rowToDelete, parse, id);
+			eqobj.removeRow(rowToDelete, parse, id);
 		}
 	}
 };
@@ -41,3 +47,7 @@ Table.fromArray = function(parse, data, id) {
 Table.fromNative = function(parse, table, id) {
 	return new Table(parse, table, id)
 }
+
+return {Table:Table}
+
+})

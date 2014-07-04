@@ -6,6 +6,19 @@ requirejs.config({
     //config is relative to the baseUrl, and
     //never includes a ".js" extension since
     //the paths config could be for a directory.
+    shim: {
+        'vendor/d3.layout.min': {
+            //These script dependencies should be loaded before loading
+            //backbone.js
+            deps: ['vendor/d3.min', 'jquery'],
+            //Once loaded, use the global 'Backbone' as the
+            //module value.
+        },
+        'rickshaw': {
+            deps: ['vendor/d3.layout.min', "bootstrap"],
+        }
+    },
+
     paths: {
         workspace: '../workspace'
     }
@@ -13,7 +26,7 @@ requirejs.config({
 
 // Start the main app logic.
 requirejs([
-        'jquery-1.10.2',
+        'jquery',
         'jquery-ui',
         'bootstrap',
         'codemirror',

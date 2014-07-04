@@ -1,4 +1,10 @@
-function HDT_fabric(table) {
+define([
+  "jquery.handsontable.full",
+], function() {
+
+return {HDT_fabric:HDT_fabric}
+
+function HDT_fabric(table, updateEditorText) {
 
 	this.options = {
 		data: table.data,
@@ -34,6 +40,7 @@ function HDT_fabric(table) {
 				changeCell(handsontable, hook)
 			})
 		}
+		updateEditorText()
 	}
 	//HELPER
 	function changeCell(handsontable, hook) {
@@ -50,7 +57,6 @@ function HDT_fabric(table) {
 				'new': new_value
 			});
 
-			updateEditorText()
 			setEmptyStringNull(handsontable)
 		}
 
@@ -74,3 +80,4 @@ function HDT_fabric(table) {
 		})
 	}
 }
+});

@@ -1,3 +1,7 @@
+define([
+  "rickshaw",
+], function() {
+
 
 
   function Rickshaw_fabric(chart, elements) {
@@ -45,3 +49,7 @@
     });
     return graph
   }
+return {Rickshaw_fabric:Rickshaw_fabric}
+}
+
+);
