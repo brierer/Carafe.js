@@ -73,6 +73,24 @@ function displayOneTable(table) {
 }
 
 
+
+function displayCells(col) {
+  var html = '<tr style="width: 20px;">'
+  $.each(col, function(i, value) {
+    html += '<td style="width: 20px;">' + value + '</td>';
+  });
+  html += '</tr>';
+  return html;
+};
+
+
+function displayOneCol(col) {
+  var html = '<th style="width: 20px;">' + col + '<i class="hidden fa fa-sort-asc pull-right" ></th>'
+  return html
+};
+
+
+
 function updateEditorText() {
   editor.getDoc().setValue(eqWrapper.toStr());
   editor.save();
