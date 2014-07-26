@@ -1,105 +1,95 @@
 define([
-  "jquery",
-  "./evaluator",
-  "./eqobj",
-  "./widget",
-], function($,evaluator,eqobj,widget) {
- alert(evaluator== undefined)
-  $.fn.serializeObject = function() {
-    var o = {};
-    var a = this.serializeArray();
-    $.each(a, function() {
-      if (o[this.name]) {
-        if (!o[this.name].push) {
-          o[this.name] = [o[this.name]];
-        }
-        o[this.name].push(this.value || '');
-      } else {
-        o[this.name] = this.value || '';
-      }
-    });
-    return o;
-  };
-  
-  var eqWrapper = eqobj.eqWrapper;
- 
+    "jquery",
+    "./evaluator",
+    "./eqobj",
+    "./widget",
+    "./fnList",
+    "nod",
+    "metisMenu",
+], function($, evaluator, eqobj, widget, fnList) {
 
-  $(function() {
-    initComposent();
-    evaluator.initPollingGetCalcResult();
-  })
+    $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name]) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+
+    var eqWrapper = eqobj.eqWrapper;
 
 
-
-  function initComposent() {
-
-    $("#formulaToggle").click(
-      function() {
-        if ($('#formula').is(':visible')) {
-          $('#formula').hide();
-          $("#page-wrapper").css("margin-left", "0px");
-        } else {
-          $('#formula').show();
-          $("#page-wrapper").css("margin-left", "250px");
-        }
-      }
-    );
-    $("input").not("[type=submit]").jqBootstrapValidation();
-    $('input').keydown(function(event) {
-      if (event.keyCode == 13) {
-        event.preventDefault();
-        return false;
-      }
-    });
-    $("#generator").hide()
-
-    $("#hide-generator").click(function() {
-      $("#generator").hide()
+    $(function() {
+        initComposent();
+        evaluator.initPollingGetCalcResult();
     })
 
-    $("#generate_table").click(
-      function() {
-        $("#generator").show()
-      }
-    )
 
 
-    $("#create-generator").click(
-      function() {
-        addTable($('#generator').serializeObject())
-      }
-    )
+    function initComposent() {
 
-    widget.setEditor();
+        $(function() {
 
-    $("#dashBoardToggle").click(
-      function() {
-        $("#dashboard").toggle();
-      }
-    );
+            $('#side-menu').metisMenu();
 
-    $("#equationToggle").click(
-      function() {
-        $("form").toggle();
-      }
-    );
+        });
+
+        //Loads the correct sidebar on window load,
+        //collapses the sidebar on window resize.
+        // Sets the min-height of #page-wrapper to window size
 
 
+        $("#formulaToggle").click(
+            function() {
+                if ($('#formula').is(':visible')) {
+                    $('#formula').hide();
+                    $("#page-wrapper").css("margin-left", "0px");
+                } else {
+                    $('#formula').show();
+                    $("#page-wrapper").css("margin-left", "250px");
+                }
+            }
+        );
+    
 
-    $("a").dblclick(function() {
-      insertAtCursor($(this).attr('title'));
-    });
+        widget.setEditor();
+        generator();
+        $("#dashBoardToggle").click(
+            function() {
+                $("#dashboard").toggle();
+            }
+        );
 
-    $(".btn_eval").click(
-      function() {
-        eqEvaluation();
-      });
+        $("#equationToggle").click(
+            function() {
+                $("form").toggle();
+            }
+        );
 
 
-  }
+
+        $("a").dblclick(function() {
+            // insertAtCursor($(this).attr('title'));
+        });
+
+        $(".btn_eval").click(
+            function() {
+                eqEvaluation();
+            });
+
+        addFunctionsToMenu()
+    }
 
 
-  function insertAtCursor(text) {
+    /*  function insertAtCursor(text) {
     var field = document.getElementById("id_equations");
 
     if (document.selection) {
@@ -121,5 +111,75 @@ define([
       field.value = val.slice(0, selStart) + text + val.slice(field.selectionEnd);
       field.setSelectionRange(caretPos, caretPos);
     }
-  }
+  }*/
+
+    function generator(){
+        $("#generator").show()
+        $("#generator").nod([ 'input', 'presence', 'Cannot be empty' ])
+
+        $("#hide-generator").click(function() {
+            $("#generator").hide()
+        })
+
+  
+        $("#create-generator").click(
+            function() {
+                //addTable($('#generator').serializeObject())
+            }
+        )
+
+    }
+
+    function addFunctionsToMenu() {
+        var f = fnList.list
+        addFunctionList(f, $('#side-menu'), 1)
+
+
+        function addFunctionList(list, elementToBeAppend, lvl) {
+
+            list.forEach(function(fn) {
+                console.log(fn)
+                if (fn instanceof fnList.SubList) {
+                    var sublist = $('<ul>', {
+                        click: function() {}
+                    })
+                    if (lvl == 1) {
+                        sublist.addClass("nav nav-second-level collapse")
+                    } else {
+                        sublist.addClass("nav nav-third-level collapse")
+                    }
+                    addFunctionList(fn.elems, sublist, lvl + 1)
+
+                    var element = $('<li>', {
+                        html: $('<a>' + fn.fn + '<span class="fa arrow"></span>', {
+                            click: function() {},
+                        })
+
+                    })
+                    sublist.appendTo(element)
+                    element.appendTo(elementToBeAppend)
+
+                } else {
+                    addFunction(fn).appendTo(elementToBeAppend)
+                }
+
+
+            })
+            return f
+        }
+
+        function addFunction(f) {
+            return $('<li>', {
+                html: $('<a>', {
+                    text: f.fn,
+                    click: function() {
+                        alert("asdff")
+                    },
+                })
+            });
+        }
+    }
+
+
+
 })

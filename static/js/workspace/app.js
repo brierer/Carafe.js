@@ -34,6 +34,8 @@ requirejs([
         'vendor/d3.layout.min',
         'vendor/d3.min',
         'rickshaw',
+        'metisMenu',
+        'nod',
         'workspace/carafe-scheme',
         'workspace/chart',
         'workspace/evaluator',
@@ -46,6 +48,8 @@ requirejs([
         'workspace/workspace',
         'jquery.mockjax',
         'workspace/mock',
+        'workspace/mquery',
+        'workspace/fnList',
     ],
     function() {
 

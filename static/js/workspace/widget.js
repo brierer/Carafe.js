@@ -4,7 +4,7 @@ define([
    "./handsontable-fabric" ,
    "./chart",
    "./table",
-   "./carafe-scheme",], 
+   "./carafe-scheme"], 
    function(
     eqobj,
     rickshaw_fabric,
@@ -17,7 +17,7 @@ define([
   var editor;
  
   function displayData(data) {
-    alert(chart.Chart)
+    
     if (data.parse !== undefined) {
       updateEditorText()
       if (data.eval.statut == "ok") {
@@ -150,6 +150,7 @@ define([
 
   }
 
+ 
   function addTable(param) {
     var id = $(".table-container").length
     var nbCol = Number(param["nb-col"])
