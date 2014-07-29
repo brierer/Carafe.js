@@ -4,9 +4,37 @@ define([
     "./eqobj",
     "./widget",
     "./fnList",
-    "nod",
+    "./generator",
     "metisMenu",
-], function($, evaluator, eqobj, widget, fnList) {
+], function($, evaluator, eqobj, widget, fnList, generator) {
+
+    var myApp = angular.module('myApp', []);
+    myApp.factory('Data', function() {
+        return {
+            message: "salut",
+        };
+    });
+
+    myApp
+        .controller('FirstCtrl', ['$scope', 'Data',
+            function($scope, Data) {
+                $scope.data = Data;
+                Data.message = "salut"
+            }
+        ]);
+
+    myApp.controller('SecondCtrl', ['$scope', 'Data',
+        function($scope, Data) {
+            $scope.data = Data;
+            $scope.reversedMessage = function() {
+                return $scope.data.message.split("").reverse().join("");
+            };
+        }
+    ]);
+
+    angular.bootstrap(document, ['myApp'])
+
+
 
     $.fn.serializeObject = function() {
         var o = {};
@@ -58,10 +86,10 @@ define([
                 }
             }
         );
-    
+
 
         widget.setEditor();
-        generator();
+        generator.init();
         $("#dashBoardToggle").click(
             function() {
                 $("#dashboard").toggle();
@@ -113,71 +141,10 @@ define([
     }
   }*/
 
-    function generator(){
-        $("#generator").show()
-        $("#generator").nod([ 'input', 'presence', 'Cannot be empty' ])
 
-        $("#hide-generator").click(function() {
-            $("#generator").hide()
-        })
-
-  
-        $("#create-generator").click(
-            function() {
-                //addTable($('#generator').serializeObject())
-            }
-        )
-
-    }
 
     function addFunctionsToMenu() {
-        var f = fnList.list
-        addFunctionList(f, $('#side-menu'), 1)
-
-
-        function addFunctionList(list, elementToBeAppend, lvl) {
-
-            list.forEach(function(fn) {
-                console.log(fn)
-                if (fn instanceof fnList.SubList) {
-                    var sublist = $('<ul>', {
-                        click: function() {}
-                    })
-                    if (lvl == 1) {
-                        sublist.addClass("nav nav-second-level collapse")
-                    } else {
-                        sublist.addClass("nav nav-third-level collapse")
-                    }
-                    addFunctionList(fn.elems, sublist, lvl + 1)
-
-                    var element = $('<li>', {
-                        html: $('<a>' + fn.fn + '<span class="fa arrow"></span>', {
-                            click: function() {},
-                        })
-
-                    })
-                    sublist.appendTo(element)
-                    element.appendTo(elementToBeAppend)
-
-                } else {
-                    addFunction(fn).appendTo(elementToBeAppend)
-                }
-
-
-            })
-            return f
-        }
-
-        function addFunction(f) {
-            return $('<li>', {
-                html: $('<a>', {
-                    text: f.fn,
-                    click: function() {
-                        alert("asdff")
-                    },
-                })
-            });
-        }
+        fnList.toHtml($("#side-menu"))
     }
 
 

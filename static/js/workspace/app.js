@@ -16,7 +16,22 @@ requirejs.config({
         },
         'rickshaw': {
             deps: ['vendor/d3.layout.min', "bootstrap"],
-        }
+        },
+        'bootstrap': {
+            deps: ['jquery'],
+        },
+        'validator': {
+            deps: ['jquery']
+        },
+        'metisMenu': {
+            deps: ['jquery']
+        },
+        'jquery-ui': {
+            deps: ['jquery']
+        },
+        'jquery.handsontable.full': {
+            deps: ['jquery']
+        },
     },
 
     paths: {
@@ -24,8 +39,11 @@ requirejs.config({
     }
 });
 
+
+
 // Start the main app logic.
-requirejs([
+require([
+        'angular',
         'jquery',
         'jquery-ui',
         'bootstrap',
@@ -35,7 +53,7 @@ requirejs([
         'vendor/d3.min',
         'rickshaw',
         'metisMenu',
-        'nod',
+        'validator',
         'workspace/carafe-scheme',
         'workspace/chart',
         'workspace/evaluator',
@@ -43,14 +61,17 @@ requirejs([
         'workspace/handsontable-fabric',
         'workspace/rickshaw-fabric',
         'workspace/table',
-        'workspace/validator',
         'workspace/widget',
         'workspace/workspace',
         'jquery.mockjax',
         'workspace/mock',
         'workspace/mquery',
         'workspace/fnList',
+        "workspace/generator",
+
     ],
     function() {
+
+    
 
     });

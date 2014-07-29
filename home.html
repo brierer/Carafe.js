@@ -27,7 +27,16 @@
 </head>
 
 <body>
+    
+    <div>
 
+        <div ng-controller="FirstCtrl">
+            <h1>{{ data.message }}</h1>
+        </div>
+
+        
+
+    </div>
 
 
     <div id="wrapper">
@@ -287,29 +296,21 @@
 
                     <li id="generate-menu" class="sidebar-search">
                         <form id="generator" style="display: none;">
-                            <label class="control-label">Create Table</label>
-                            <div class="control-group">
-                                <div class="controls">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon">Name</span>
-                                        <input name="table-name" type="text" class="form-control" placeholder="Table name">
-                                    </div>
-                                    <p class="help-block"></p>
+                            <label class="control-label"></label>
+                            <div class="form-group">
+
+                                <div class="input-group">
+                                    <span class="input-group-addon">Name</span>
+                                    <input class="form-control" placeholder="" name="firstname" type="text" />
                                 </div>
                             </div>
 
 
-                            <div class="control-group">
-                                <div class="controls">
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-addon"># Col</span>
-                                        <input name="nb-col" type="number" class="form-control" placeholder="Number of Columns">
-                                    </div>
-                                    <p class="help-block"></p>
-                                </div>
-                            </div>
-                            <button id="create-generator" type="button" class="btn btn-primary">Create</button>
-                            <button id="hide-generator" type="button" class="btn btn-primary">Hide</button>
+                            <button id="create-generator" type="button" class="btn btn-large btn-success generator-button"><i class="fa fa-plus-circle  fa-fw"></i>
+                            </button>
+                            <button id="hide-generator" type="button" class="btn btn-success generator-button"><i class="fa fa-times-circle fa-fw"></i>
+                            </button>
+
                         </form>
 
 
@@ -317,7 +318,7 @@
                         <!-- /input-group -->
                     </li>
 
-                 
+
                     <li>
                         <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Charts<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level collapse">
@@ -336,8 +337,8 @@
                         </ul>
                         <!-- /.nav-second-level -->
                     </li>
-                  
-                   
+
+
                 </ul>
                 <!-- /#side-menu -->
             </div>
@@ -354,7 +355,7 @@
                     <div class="panel-heading">
                         <i class="fa fa-list-ul fa-fw"></i> Equations
                         <div class="pull-right">
-                            <a id="btn_eval" class="btn_eval btn btn-danger btn-xs">GO!</a>
+                            <a id="btn_eval" class="btn_eval btn btn-success btn-xs">GO!</a>
                         </div>
                     </div>
                     <input id="id_form_id" name="form_id" type="hidden" value="127.0.0.11404226994.71" />
@@ -371,7 +372,7 @@
                 <div class="panel-heading">
                     <i class="fa fa-dashboard fa-fw"></i> Dashboard
                     <div class="pull-right">
-                        <a class="btn_eval btn btn-danger btn-xs">GO!</a>
+                        <a class="btn_eval btn btn-success btn-xs">GO!</a>
                     </div>
                 </div>
                 <div id="containment-wrapper" class="panel-body" style="height:1000px"></div>
