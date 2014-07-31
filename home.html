@@ -27,16 +27,6 @@
 </head>
 
 <body>
-    
-    <div>
-
-        <div ng-controller="FirstCtrl">
-            <h1>{{ data.message }}</h1>
-        </div>
-
-        
-
-    </div>
 
 
     <div id="wrapper">
@@ -281,7 +271,7 @@
 
         <nav id="formula" class="navbar-default navbar-static-side" role="navigation">
             <div class="sidebar-collapse">
-                <ul class="nav" id="side-menu">
+                <ul class="nav" id="side-menu" ng-controller="FunctionGenerator">
                     <li class="sidebar-search">
                         <div class="input-group custom-search-form">
                             <input type="text" class="form-control" placeholder="Search...">
@@ -294,50 +284,53 @@
                         <!-- /input-group -->
                     </li>
 
-                    <li id="generate-menu" class="sidebar-search">
-                        <form id="generator" style="display: none;">
-                            <label class="control-label"></label>
-                            <div class="form-group">
-
-                                <div class="input-group">
-                                    <span class="input-group-addon">Name</span>
-                                    <input class="form-control" placeholder="" name="firstname" type="text" />
+                    <li ng-hide="hide" id="generate-menu" class="sidebar-search">
+                        <div>
+                            <form name="form" novalidate class="css-form">
+                                <div class="form-group">
+                                <span>{{fnSelected.title}}</span>
+                                    <ng-form class="input-group">
+                                        <span class="input-group-addon">Name</span>
+                                        <input class="form-control" ng-model="fnSelected.variable_name" name="input" type="text" />
+                                    </ng-form>
                                 </div>
-                            </div>
+                                <div ng-repeat="input in inputs" class="form-group">
+
+                                    <ng-form name="innerForm" class="input-group">
+                                        <span class="input-group-addon">{{input.title}}</span>
+                                        <input class="form-control" ng-model="input.value" name="input" type="text" smart-float=input.validation required/>
+                                    </ng-form>
+                                    <span class="nod_msg" ng-show="innerForm.input.$error.valid">
+                                        {{input.validation.msg}}</span>
+                                </div>
 
 
-                            <button id="create-generator" type="button" class="btn btn-large btn-success generator-button"><i class="fa fa-plus-circle  fa-fw"></i>
-                            </button>
-                            <button id="hide-generator" type="button" class="btn btn-success generator-button"><i class="fa fa-times-circle fa-fw"></i>
-                            </button>
+                                <button ng-click="update(inputs)" ng-disabled="form.$invalid" id="create-generator" type="button" class="btn btn-large btn-success generator-button"><i class="fa fa-plus-circle  fa-fw"></i>
+                                </button>
+                                <button id="hide-generator" ng-click="cancel()" type="button" class="btn btn-success generator-button pull-right"><i class="fa fa-times-circle fa-fw"></i>
+                                </button>
 
-                        </form>
+                            </form>
 
-
+                        </div>
 
                         <!-- /input-group -->
                     </li>
 
 
-                    <li>
-                        <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Charts<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level collapse">
-                            <li>
-                                <a title="chart.line(['list'])">Line</a>
-                            </li>
-                            <li>
-                                <a>Area</a>
-                            </li>
-                            <li>
-                                <a>Bar</a>
-                            </li>
-                            <li>
-                                <a>Donut</a>
+                    <li ng-repeat="fn in fnDict">
+                        <a ng-click="changeSelectedFn(fn)" href="#"><i class="fa fa-fw {{fn.icon}}"></i> {{fn.title}}<span ng-if="fn.fns" class="fa arrow"></span></a>
+                        <ul ng-if="fn.fns" class="nav nav-second-level collapse">
+                            <li ng-repeat="childfn in fn.fns">
+                                <a ng-click="changeSelectedFn(childfn)" href="#"><i class="fa fa-fw {{childfn.icon}}"> </i> {{childfn.title}}<span ng-if="childfn.fns" class="fa arrow"></span></a>
+                                <ul ng-if="childfn.fns" class="nav nav-third-level collapse">
+                                    <li ng-repeat="subchildfn in childfn.fns">
+                                        <a ng-click="changeSelectedFn(subchildfn)" href="#"><i class="fa fa-fw {{subchildfn.icon}}"> </i> {{subchildfn.title}}<span ng-if="subchildfn.fns" class="fa arrow"></span></a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
-                        <!-- /.nav-second-level -->
                     </li>
-
 
                 </ul>
                 <!-- /#side-menu -->

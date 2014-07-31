@@ -1,12 +1,32 @@
-define(["./generator"], function(generator) {
+define(["./widget"], function(widget) {
+
+
+    var validations = {
+        v_integer: {
+            fn: valid_integer,
+            msg: "This is not valid integer!"
+        },
+        v_float: {
+            fn: valid_float,
+            msg: "This is not a valid float!"
+        }
+    }
+
+
     FunctionCreator = function(param) {
         if (!(this instanceof FunctionCreator)) {
             return new FunctionCreator(param);
         }
+
         this.title = param.title
-        this.arg = param.arg
+        if (param.icon != undefined) {
+            this.icon = param.icon
+        } else {
+            this.icon = ""
+        }
+        this.argument = param.argument
         this.callback = param.callback
-        this.param = param
+
     }
 
     SubList = function(title, fns) {
@@ -15,94 +35,82 @@ define(["./generator"], function(generator) {
         }
         this.title = title
         this.fns = fns
+        this.icon = "fa-sitemap"
     }
 
-    list = [
+    var list = [
         FunctionCreator({
             'title': 'table',
-            'arg': [{
-                'title': 'Nb Col',
-                'type': 'number',
-                'validation': {
-                    required: true
+            'icon': 'fa-table',
+            'argument': {
+                nbcol: {
+                    'title': 'Nb Col',
+                    'type': 'number',
+                    'validation': validations.v_integer
+                },
+                nbrow: {
+                    'title': 'Nb Row',
+                    'type': 'number',
+                    'validation': validations.v_integer
                 }
-            }],
-            'callback': function() {
-                alert("asdf")
+            },
+            'callback': function(fn) {
+                widget.addTable(this.variable_name, fn.nbcol.value)
             }
         }),
         SubList("Math", [FunctionCreator({
-                'title': 'sum'
-            }),
-            SubList("Stats", [FunctionCreator({
-                'title': 'corr'
-            }), SubList("Math", [FunctionCreator({
                 'title': 'sum',
-                'arg': [{
-                    'title': 'Nb Col',
+                'argument': [{
+                    'title': 'x',
                     'type': 'number',
-                    'validation': {
-                        required: true,
-                        number: true
-                    }
+                    'validation': validations.v_float
+                }, {
+                    'title': 'y',
+                    'type': 'number',
+                    'validation': validations.v_float
                 }],
                 'callback': function() {
                     alert("asdf")
                 }
-            })])])
+            }),
+            SubList("Stats", [FunctionCreator({
+                'title': 'sum',
+                'argument': [{
+                    'title': 'x',
+                    'type': 'number',
+                    'validation': validations.v_float
+                }, {
+                    'title': 'y',
+                    'type': 'number',
+                    'validation': validations.v_float
+                }],
+                'callback': function() {
+                    alert("asdf")
+                }
+            })])
         ])
     ]
 
-    toHtml = function(elementToBeAppend) {
-        addFunctionCreatorList(list, elementToBeAppend, "nav nav-second-level collapse")
 
 
-        function addFunctionCreatorList(list, elementToBeAppend, classToAppend) {
-            var f = list
-            list.forEach(function(el) {
-                if (el instanceof SubList) {
-                    var sublist = $('<ul>', {
-                        click: function() {}
-                    })
 
-                    sublist.addClass(classToAppend)
-
-                    sublist.addClass("nav nav-third-level collapse")
-
-                    addFunctionCreatorList(el.fns, sublist, "nav nav-third-level collapse")
-
-                    var element = $('<li>', {
-                        html: $('<a>' + el.title + '<span class="fa arrow"></span>', {
-                            click: function() {},
-                        })
-
-                    })
-                    sublist.appendTo(element)
-                    element.appendTo(elementToBeAppend)
-
-                } else {
-                    addFunctionCreator(el).appendTo(elementToBeAppend)
-                }
-
-
-            })
-            return f
+    function valid_float(value) {
+        var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        if (FLOAT_REGEXP.test(value)) {
+            return parseFloat(value.replace(',', '.'));
+        } else {
+            return undefined;
         }
-
-        function addFunctionCreator(f) {
-            return $('<li>', {
-                html: $('<a>', {
-                    text: f.title,
-                    click: function() {
-                        generator.update(f)
-                    },
-                })
-            });
-        }
-
     }
 
+    function valid_integer(value) {
+        var REGEXP = /^\-?\d+$/;
+        return REGEXP.test(value)
+    }
+
+
     return {
-        toHtml: toHtml
+
+        list: list
     }
 })

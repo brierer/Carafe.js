@@ -24,7 +24,6 @@ define(["./eqobj","./widget" ,"./mock"], function(eqobj,widget) {
 	}
 
 	function pollingServerCalcGetResult(nbTry) {
-		console.log("ag");
 		if (nbTry < 5) {
 			var id_form = $("#id_form_id").serialize();
 			var id_book = $("#id_book_id").serialize();

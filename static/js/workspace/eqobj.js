@@ -189,7 +189,6 @@ define(["./mquery"], function(mquery) {
 	}
 
 	function isColReadOnly(row, col, item) {
-
 		var getElemAtCol = manySearch_(item, [getElemOfArray(col)])
 		if (getElemAtCol.isNothing()) {
 			return true
@@ -414,7 +413,8 @@ define(["./mquery"], function(mquery) {
 		eqs = eqWrapper.getEQ();
 		eqs[eqs.length - 1][1].s2 = "\n";
 		eqs.push([name, value])
-		return name
+		console.log(value)
+		return value
 	}
 
 	function createString(val) {
@@ -496,6 +496,12 @@ define(["./mquery"], function(mquery) {
 		manySearch: manySearch_,
 		addRow: addRow,
 		addCol: addCol,
+		addShow: addShow,
+		addEq: addEq,
 		removeCol: removeCol,
+		createFunction: createFunction,
+		createMatrix:createMatrix,
+		createObject:createObject,
+		createArray: createArray,
 	}
 })

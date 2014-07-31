@@ -8,31 +8,7 @@ define([
     "metisMenu",
 ], function($, evaluator, eqobj, widget, fnList, generator) {
 
-    var myApp = angular.module('myApp', []);
-    myApp.factory('Data', function() {
-        return {
-            message: "salut",
-        };
-    });
-
-    myApp
-        .controller('FirstCtrl', ['$scope', 'Data',
-            function($scope, Data) {
-                $scope.data = Data;
-                Data.message = "salut"
-            }
-        ]);
-
-    myApp.controller('SecondCtrl', ['$scope', 'Data',
-        function($scope, Data) {
-            $scope.data = Data;
-            $scope.reversedMessage = function() {
-                return $scope.data.message.split("").reverse().join("");
-            };
-        }
-    ]);
-
-    angular.bootstrap(document, ['myApp'])
+  
 
 
 
@@ -89,7 +65,7 @@ define([
 
 
         widget.setEditor();
-        generator.init();
+      
         $("#dashBoardToggle").click(
             function() {
                 $("#dashboard").toggle();
@@ -113,7 +89,6 @@ define([
                 eqEvaluation();
             });
 
-        addFunctionsToMenu()
     }
 
 
@@ -144,7 +119,6 @@ define([
 
 
     function addFunctionsToMenu() {
-        fnList.toHtml($("#side-menu"))
     }
 
 

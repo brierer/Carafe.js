@@ -1,85 +1,80 @@
-define(["jquery", "validator"], function($, validator) {
-    var clickedElement
-    init = function() {
-        $("#containment-wrapper").mouseup(function(event) {
-            clickedElement = event.target;
-        });
-
-        $("#editor").mouseup(function(event) {
-            clickedElement = null;
-        });
-
-        $("#hide-generator").click(function() {
-            $("#generator").hide()
-        })
+define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
 
 
-        $("#create-generator").click(
-            function() {
-               
-                if ($("#generator").valid()) {
-                    //$("#generator").hide()
-                }
-                //addTable($('#generator').serializeObject())
-                 $("#generator").find("input").slice(1).rules("remove")
-            }
-        )
-
-        $("#generator").validate({
-
-            highlight: function(element) {
-                $(element).closest('.form-group').addClass('has-error');
+    var app = angular.module('myApp', []);
+    var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+    app.directive('smartFloat', function() {
+        return {
+            require: 'ngModel',
+            scope: {
+                fn: '&smartFloat'
             },
-            unhighlight: function(element) {
-                $(element).closest('.form-group').removeClass('has-error');
-            },
-            errorElement: 'span',
-            errorClass: 'help-block',
-            errorPlacement: function(error, element) {
-                if (element.parent('.input-group').length) {
-                    error.insertAfter(element.parent());
-                } else {
-                    error.insertAfter(element);
+            link: function(scope, elm, attrs, ctrl) {
+                var valid_fn = scope.fn().fn
+                ctrl.$parsers.unshift(function(viewValue) {
+                    if (viewValue == undefined || viewValue.length == 0) {
+                        ctrl.$setValidity('valid', true)
+                        return viewValue
+                    }
+                    var valid_value = valid_fn(viewValue)
+                    if (typeof valid_value == "boolean") {
+                        ctrl.$setValidity('valid', valid_value);
+                        return viewValue
+                    } else {
+                        ctrl.$setValidity('valid', valid_value !== undefined);
+                        return valid_value;
+                    }
+                });
+            }
+        };
+    });
+
+
+    app.controller('FunctionGenerator', ['$scope',
+        function($scope) {
+            $scope.inputs = []
+            $scope.fnDict = fnList.list
+            $scope.fnSelected = null
+            $scope.hide = true
+
+
+            $scope.update = function(inputs) {
+                console.log(inputs)
+               $scope.fnSelected.callback(inputs)
+               $scope.hide = true
+            };
+
+            $scope.reset = function() {
+                $scope.user = angular.copy($scope.master);
+            };
+
+            $scope.isUnchanged = function(inputs) {
+                return angular.equals(inputs, $scope.master);
+            };
+
+            $scope.cancel = function() {
+                $scope.hide = true
+            }
+
+            $scope.changeSelectedFn = function(fn) {
+                console.log(JSON.stringify(fn))
+                if (fn != undefined && fn.argument != undefined) {
+                    $scope.hide = false
+                    $scope.inputs = angular.copy(fn.argument)
+                    $scope.fnSelected = fn
                 }
             }
-        });
-    }
 
-    update = function(f) {
+        }
 
-        $("#generator").show()
-        console.log($(clickedElement).html())
-        $("#generator").show()
-        var gen = $("#generator")
-     
-        gen.find('input').rules("remove");
-        gen.children(".form-group:not(:first)").remove()
-
-        gen.children("label").html("Add " + f.title)
-
-        var rules = {}
-
-        f.arg.forEach(function(arg, i) {
-            var field = createField(arg.title, i)
-            gen.children("button:first").before(field)
-            field.find("input").rules("add", arg.validation)
-        })
+    ]);
 
 
 
-    }
 
-    function createField(name, i) {
-        var field = $(".form-group:first").clone()
 
-        field.find(".input-group-addon").html(name)
-        field.find("input").attr("name", "arg" + i)
+    angular.bootstrap(document, ['myApp'])
 
-        return field
-    }
 
-    return {
-        update: update,
-        init: init
-    }
+
 })
