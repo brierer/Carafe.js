@@ -1,6 +1,4 @@
 define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
-
-
     var app = angular.module('myApp', []);
     var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
     app.directive('smartFloat', function() {
@@ -39,9 +37,9 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
 
 
             $scope.update = function(inputs) {
-                console.log(inputs)
-               $scope.fnSelected.callback(inputs)
-               $scope.hide = true
+                console.log(JSON.stringify(inputs))
+                $scope.fnSelected.callback(inputs)
+                $scope.hide = true
             };
 
             $scope.reset = function() {
@@ -71,7 +69,26 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
 
 
 
+    app.directive("smart", function() {
+        return {
+            restrict: 'A',
+            link: function($scope, el, attrs) {
+                el.bind("change", function(e) {
+           
+                    $scope.fnSelected.file = (e.srcElement || e.target).files[0];
+                    console.log(JSON.stringify(attrs))
 
+                    /*var reader = new FileReader()
+                    reader.onload = function(e) {
+                        $scope.textr = reader.result;
+                        console.log($scope.textr)
+                    }
+                    reader.readAsBinaryString($scope.file)*/
+
+                });
+            }
+        }
+    })
 
     angular.bootstrap(document, ['myApp'])
 

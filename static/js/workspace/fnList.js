@@ -9,6 +9,14 @@ define(["./widget"], function(widget) {
         v_float: {
             fn: valid_float,
             msg: "This is not a valid float!"
+        },
+        v_file: {
+            fn: valid_file,
+            msg: "This is not a valid file!"
+        },
+        v_url: {
+            fn: valid_url,
+            msg: "This is not a valid url!"
         }
     }
 
@@ -39,25 +47,69 @@ define(["./widget"], function(widget) {
     }
 
     var list = [
-        FunctionCreator({
-            'title': 'table',
-            'icon': 'fa-table',
-            'argument': {
-                nbcol: {
-                    'title': 'Nb Col',
-                    'type': 'number',
-                    'validation': validations.v_integer
+        SubList("Table", [
+            FunctionCreator({
+                'title': 'New Table',
+                'icon': 'fa-table',
+                'argument': {
+                    nbcol: {
+                        'title': 'Nb Col',
+                        'validation': validations.v_integer
+                    },
+                    nbrow: {
+                        'title': 'Nb Row',
+                        'validation': validations.v_integer
+                    }
                 },
-                nbrow: {
-                    'title': 'Nb Row',
-                    'type': 'number',
-                    'validation': validations.v_integer
+                'callback': function(fn) {
+                    console.log(this)
+                    widget.addTable(this.variable_name, fn.nbcol.value)
                 }
-            },
-            'callback': function(fn) {
-                widget.addTable(this.variable_name, fn.nbcol.value)
-            }
-        }),
+            }),
+            FunctionCreator({
+                'title': 'Table from CSV FILE',
+                'icon': 'fa-table',
+                'argument': {
+                    file: {
+                        'title': 'File',
+                        'type': 'file',
+                        'validation': validations.v_file
+                    }
+                },
+                'callback': function(fn) {
+                    var reader = new FileReader()
+                    var variable_name = this.variable_name
+                    reader.onload = function(e) {
+                        var text = reader.result;
+                        console.log(JSON.stringify(processData(text)))
+                        widget.addTableWithData(variable_name, processData(text))
+                    }
+                    reader.readAsBinaryString(this.file)
+
+                }
+            }),
+            FunctionCreator({
+                'title': 'Table from CSV URL',
+                'icon': 'fa-table',
+                'argument': {
+                    URL: {
+                        'title': 'URL',
+                        'validation': validations.v_url
+                    }
+                },
+                'callback': function(fn) {
+                    var reader = new FileReader()
+                    var variable_name = this.variable_name
+                    reader.onload = function(e) {
+                        var text = reader.result;
+                        console.log(JSON.stringify(processData(text)))
+                        widget.addTableWithData(variable_name, processData(text))
+                    }
+                    reader.readAsBinaryString(this.file)
+
+                }
+            })
+        ]),
         SubList("Math", [FunctionCreator({
                 'title': 'sum',
                 'argument': [{
@@ -92,7 +144,11 @@ define(["./widget"], function(widget) {
     ]
 
 
-
+    function valid_file(value) {
+        console.log("YO")
+        console.log((value.srcElement || value.target).files[0])
+        return value
+    }
 
     function valid_float(value) {
         var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
@@ -108,6 +164,37 @@ define(["./widget"], function(widget) {
         return REGEXP.test(value)
     }
 
+
+    function valid_url(value) {
+        var parser = document.createElement('a');
+        parser.href = value;
+        return (parser.hostname != null)
+ 
+    }
+
+
+    function read_file(file) {
+        console.log(JSON.stringify(file))
+    }
+
+    function processData(allText) {
+        var allTextLines = allText.split(/\r\n|\n/);
+        var headers = allTextLines[0].split(',');
+        var lines = [];
+
+        for (var i = 1; i < allTextLines.length; i++) {
+            var data = allTextLines[i].split(',');
+            if (data.length == headers.length) {
+
+                var tarr = [];
+                for (var j = 0; j < headers.length; j++) {
+                    tarr.push(data[j]);
+                }
+                lines.push(tarr);
+            }
+        }
+        return lines
+    }
 
     return {
 

@@ -154,14 +154,26 @@ define([
         function addTable(name, nbcol) {
             var nbCol = parseInt(nbcol)
             var arr = new Array(nbCol);
-            
+
             for (var a = []; a.length < 1; a.push(arr.slice(0)));
 
 
             var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
+
             var eqs = eqobj.addEq(name, f)
-            eqobj.addShow(eqs)
-            displayOneTable(table.Table.fromArray(eqs, a ,null))
+            eqobj.addShow(name)
+            displayOneTable(table.Table.fromArray(eqs, a, null))
+            setWidget();
+        }
+
+        function addTableWithData(name, data) {
+            var a = data
+            var nbCol = data[0].length
+            var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0, data), eqobj.createObject()])
+
+            var eqs = eqobj.addEq(name, f)
+            eqobj.addShow(name)
+            displayOneTable(table.Table.fromArray(eqs, a, null))
             setWidget();
         }
 
@@ -181,6 +193,7 @@ define([
         return {
             displayData: displayData,
             setEditor: setEditor,
-            addTable: addTable
+            addTable: addTable,
+            addTableWithData: addTableWithData
         }
     });

@@ -29,8 +29,6 @@
 <body>
 
 
-    <div id="wrapper">
-
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
@@ -283,7 +281,7 @@
                         </div>
                         <!-- /input-group -->
                     </li>
-
+                    
                     <li ng-hide="hide" id="generate-menu" class="sidebar-search">
                         <div>
                             <form name="form" novalidate class="css-form">
@@ -297,8 +295,8 @@
                                 <div ng-repeat="input in inputs" class="form-group">
 
                                     <ng-form name="innerForm" class="input-group">
-                                        <span class="input-group-addon">{{input.title}}</span>
-                                        <input class="form-control" ng-model="input.value" name="input" type="text" smart-float=input.validation required/>
+                                        <span class="input-group-addon" ng-show="{{input.type == null}}" >{{input.title}}</span>
+                                        <input ng-class="(input.type==null) ? 'form-control' : ''" ng-model="input.value" name="input" type="{{input.type}}"  smart-float=input.validation  smart/>
                                     </ng-form>
                                     <span class="nod_msg" ng-show="innerForm.input.$error.valid">
                                         {{input.validation.msg}}</span>

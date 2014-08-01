@@ -17,6 +17,9 @@ requirejs.config({
         'rickshaw': {
             deps: ['vendor/d3.layout.min', "bootstrap"],
         },
+         'filereader': {
+            deps: ['jquery'],
+        },
         'bootstrap': {
             deps: ['jquery'],
         },
@@ -48,6 +51,7 @@ require([
         'jquery-ui',
         'bootstrap',
         'codemirror',
+        'filereader',
         'jquery.handsontable.full',
         'vendor/d3.layout.min',
         'vendor/d3.min',

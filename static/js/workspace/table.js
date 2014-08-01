@@ -6,7 +6,7 @@ define([
 
 
     function Table(exp, table, id) {
-    	console.log(exp)
+        console.log(exp)
         this.data = table.data
         this.param = table.p
         this.parse = exp
@@ -14,12 +14,12 @@ define([
         this.width = Math.min(75 * table.data[0].length, 750)
         this.cells = function(row, col, prop) {
             var cellProperties = {};
-            console.log(exp.copy())
             cellProperties.readOnly = eqobj.isColReadOnly(row, col, exp.copy());
             return cellProperties;
         }
         this.event = {
             afterChange: function(hook) {
+                console.log(hook)
                 eqobj.addOrChangeValue(hook, exp.copy());
             },
 
@@ -56,10 +56,19 @@ define([
         var table = validateTableWithArray(data)
         if (id != null) {
             exp = eqobj.getDisplayItem(exp, id)
-        } else {	
-        	exp = M(exp)
+        } else {
+            exp = M(exp)
         }
-        return new Table(eqobj.manySearch(exp, [eqobj.getFunction("table", 0)]), table, id)
+        var table = new Table(eqobj.manySearch(exp, [eqobj.getFunction("table", 0)]), table, id)
+     
+        data.forEach(function(row, i) {
+            row.forEach(function(cell, y) {
+            	var hook = {'row':i, 'col':y, 'old':"", 'new': data[i][y]}
+            	 table.event.afterChange(hook)
+            })
+        })
+
+        return table
 
         function validateTableWithArray(data) {
             var table = {
@@ -76,7 +85,6 @@ define([
     }
     Table.fromNative = function(exp, table, id) {
         var m = searchTable(exp, id)
-        console.log(m.val())
         return new Table(m, table, id)
     }
 
