@@ -6,7 +6,6 @@ define([
 
 
     function Table(exp, table, id) {
-        console.log(exp)
         this.data = table.data
         this.param = table.p
         this.parse = exp
@@ -19,7 +18,6 @@ define([
         }
         this.event = {
             afterChange: function(hook) {
-                console.log(hook)
                 eqobj.addOrChangeValue(hook, exp.copy());
             },
 
@@ -40,6 +38,7 @@ define([
                 }
             }
         }
+        console.log(this.param)
     };
     /*function removeFromVariable(row, exp) {
 		var val = exp.val()
@@ -52,34 +51,38 @@ define([
 	}*/
 
 
-    Table.fromArray = function(exp, data, id) {
-        var table = validateTableWithArray(data)
+    Table.fromArray = function(exp, data, id, header) {
+        var table = validateTableWithArray(data, header)
         if (id != null) {
             exp = eqobj.getDisplayItem(exp, id)
         } else {
             exp = M(exp)
         }
         var table = new Table(eqobj.manySearch(exp, [eqobj.getFunction("table", 0)]), table, id)
-     
+
         data.forEach(function(row, i) {
             row.forEach(function(cell, y) {
-            	var hook = {'row':i, 'col':y, 'old':"", 'new': data[i][y]}
-            	 table.event.afterChange(hook)
+                var hook = {
+                    'row': i,
+                    'col': y,
+                    'old': "",
+                    'new': data[i][y]
+                }
+                table.event.afterChange(hook)
             })
         })
 
         return table
 
-        function validateTableWithArray(data) {
+        function validateTableWithArray(data, header) {
+            (header === undefined) ? header = false : header;
             var table = {
-                data: data,
+                data: header ? data.slice(1, data.length) : data,
                 p: {
-                    col: []
+                    col: header ? data.shift() : true
                 }
             }
-            $.each(table.data, function(i, col) {
-                table.p.col = true;
-            });
+
             return table;
         }
     }

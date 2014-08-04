@@ -8,21 +8,24 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
                 fn: '&smartFloat'
             },
             link: function(scope, elm, attrs, ctrl) {
-                var valid_fn = scope.fn().fn
-                ctrl.$parsers.unshift(function(viewValue) {
-                    if (viewValue == undefined || viewValue.length == 0) {
-                        ctrl.$setValidity('valid', true)
-                        return viewValue
-                    }
-                    var valid_value = valid_fn(viewValue)
-                    if (typeof valid_value == "boolean") {
-                        ctrl.$setValidity('valid', valid_value);
-                        return viewValue
-                    } else {
-                        ctrl.$setValidity('valid', valid_value !== undefined);
-                        return valid_value;
-                    }
-                });
+                if (scope.fn != null && scope.fn() != null) {
+                    var valid_fn = scope.fn().fn
+
+                    ctrl.$parsers.unshift(function(viewValue) {
+                        if (viewValue == undefined || viewValue.length == 0) {
+                            ctrl.$setValidity('valid', true)
+                            return viewValue
+                        }
+                        var valid_value = valid_fn(viewValue)
+                        if (typeof valid_value == "boolean") {
+                            ctrl.$setValidity('valid', valid_value);
+                            return viewValue
+                        } else {
+                            ctrl.$setValidity('valid', valid_value !== undefined);
+                            return valid_value;
+                        }
+                    });
+                }
             }
         };
     });
@@ -37,7 +40,7 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
 
 
             $scope.update = function(inputs) {
-                console.log(JSON.stringify(inputs))
+                console.log(inputs)
                 $scope.fnSelected.callback(inputs)
                 $scope.hide = true
             };
@@ -74,17 +77,8 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
             restrict: 'A',
             link: function($scope, el, attrs) {
                 el.bind("change", function(e) {
-           
-                    $scope.fnSelected.file = (e.srcElement || e.target).files[0];
-                    console.log(JSON.stringify(attrs))
-
-                    /*var reader = new FileReader()
-                    reader.onload = function(e) {
-                        $scope.textr = reader.result;
-                        console.log($scope.textr)
-                    }
-                    reader.readAsBinaryString($scope.file)*/
-
+                    if ((e.srcElement || e.target).files != null)
+                        $scope.fnSelected.file = (e.srcElement || e.target).files[0];
                 });
             }
         }
