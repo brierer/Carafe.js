@@ -5,8 +5,9 @@ define([
 
 
 
-    function Table(exp, table, id) {
+    function Table(exp, prettyData, table, id) {
         this.data = table.data
+        this.prettyData = prettyData
         this.param = table.p
         this.parse = exp
         this.id = id
@@ -40,15 +41,7 @@ define([
         }
         console.log(this.param)
     };
-    /*function removeFromVariable(row, exp) {
-		var val = exp.val()
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = findEQ(val.f.name).v;
-			removeFromVariable(row, valueToChange, eqObj);
-		} else {
-			exp.val().a.splice(row - 1, 1);
-		}
-	}*/
+
 
 
     Table.fromArray = function(exp, data, id, header) {
@@ -88,7 +81,8 @@ define([
     }
     Table.fromNative = function(exp, table, id) {
         var m = searchTable(exp, id)
-        return new Table(m, table, id)
+        var prettyData = eqobj.eqWrapper.toStrValue(m.val())
+        return new Table(m, prettyData, table, id)
     }
 
     function searchTable(exp, id) {

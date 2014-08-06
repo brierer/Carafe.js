@@ -35,9 +35,10 @@
                 $this.find("li").not(".active").has("ul").children("ul").addClass("collapse");
             }
 
+            
             $this.find("li").has("ul").children("a").on("click", function (e) {
                 e.preventDefault();
-
+  
                 $(this).parent("li").toggleClass("active").children("ul").collapse("toggle");
 
                 if ($toggle) {

@@ -57,7 +57,7 @@ define(["./widget"], function(widget) {
                         'validation': validations.v_integer
                     }
                 },
-                'callback': function(fn) {
+                'callback': function(fn, widget) {
                     widget.addTable(this.variable_name, fn.nbcol.value)
                 }
             }),
@@ -76,7 +76,7 @@ define(["./widget"], function(widget) {
                         'validation': null
                     }
                 },
-                'callback': function(fn) {
+                'callback': function(fn, widget) {
                     var reader = new FileReader()
                     var variable_name = this.variable_name
                     reader.onload = function(e) {
@@ -102,8 +102,8 @@ define(["./widget"], function(widget) {
                         'validation': null
                     }
                 },
-                'callback': function(fn) {
-                    processURL(this.variable_name, fn)
+                'callback': function(fn ,widget) {
+                    processURL(this.variable_name, fn , widget)
                 }
             })
         ]),
@@ -202,7 +202,7 @@ define(["./widget"], function(widget) {
     }
 
 
-    function processURL(variable_name, fn) {
+    function processURL(variable_name, fn , widget) {
 
         // Create the XHR object.
         function createCORSRequest(method, url) {

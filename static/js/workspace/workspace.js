@@ -1,15 +1,13 @@
 define([
     "jquery",
+    "metisMenu",
     "./evaluator",
     "./eqobj",
     "./widget",
     "./fnList",
     "./generator",
     "filereader",
-    "metisMenu",
-], function($, evaluator, eqobj, widget, fnList, generator) {
-
-
+], function($, metisMenu, evaluator, eqobj, widget, fnList, generator) {
 
 
 
@@ -33,17 +31,19 @@ define([
 
 
     $(function() {
-
-        initComposent();
-        evaluator.initPollingGetCalcResult();
+        var app = angular.module('myApp', []);
+        initComposent(app);
+        angular.bootstrap(document, ['myApp'])
+        $('#side-menu').metisMenu();
+        //evaluator.initPollingGetCalcResult();
     })
 
 
 
-    function initComposent() {
+    function initComposent(app) {
 
-        $('#side-menu').metisMenu();
-
+        generator.init(app);
+        widget.init(app);
         $("#formulaToggle").click(
             function() {
                 if ($('#formula').is(':visible')) {
@@ -57,7 +57,7 @@ define([
         );
 
 
-        widget.setEditor();
+
 
         $("#dashBoardToggle").click(
             function() {
@@ -74,40 +74,45 @@ define([
 
 
         $("a").dblclick(function() {
+
+            $('#side-menu').metisMenu();
             // insertAtCursor($(this).attr('title'));
         });
 
-        $(".btn_eval").click(
-            function() {
-                eqEvaluation();
-            });
+
+        //$(".btn_eval").click(
+        //   function() {
+        //      evaluator.eqEvaluation();
+        // });
+        //$this.find("li").has("ul").children("a").size()
+        //$('#side-menu').metisMenu();
 
     }
 
 
-    /*  function insertAtCursor(text) {
-    var field = document.getElementById("id_equations");
+    function insertAtCursor(text) {
+        var field = document.getElementById("id_equations");
 
-    if (document.selection) {
-      var range = document.selection.createRange();
+        if (document.selection) {
+            var range = document.selection.createRange();
 
-      if (!range || range.parentElement() != field) {
-        field.focus();
-        range = field.createTextRange();
-        range.collapse(false);
-      }
-      range.text = text;
-      range.collapse(false);
-      range.select();
-    } else {
-      field.focus();
-      var val = field.value;
-      var selStart = field.selectionStart;
-      var caretPos = selStart + text.length;
-      field.value = val.slice(0, selStart) + text + val.slice(field.selectionEnd);
-      field.setSelectionRange(caretPos, caretPos);
+            if (!range || range.parentElement() != field) {
+                field.focus();
+                range = field.createTextRange();
+                range.collapse(false);
+            }
+            range.text = text;
+            range.collapse(false);
+            range.select();
+        } else {
+            field.focus();
+            var val = field.value;
+            var selStart = field.selectionStart;
+            var caretPos = selStart + text.length;
+            field.value = val.slice(0, selStart) + text + val.slice(field.selectionEnd);
+            field.setSelectionRange(caretPos, caretPos);
+        }
     }
-  }*/
 
 
 
