@@ -106,7 +106,7 @@
                             <div ng-repeat="input in inputs" class="form-group">
 
                                 <ng-form name="innerForm" class="input-group">
-                                    <span  ng-class="((input.type==null) ? 'input-group-addon' : '')">{{input.title}}</span>
+                                    <span ng-class="((input.type==null) ? 'input-group-addon' : '')">{{input.title}}</span>
                                     <input ng-click="selectedInput(input)" ng-class="[(input.type==null) ? 'form-control' : '',(isSelectedInput (input)) ? 'input-selected': '']" ng-model="input.value" name="input" type="{{input.type}}" smart-float=input.validation smart ng-required="input.type==null" />
                                 </ng-form>
                                 <span class="nod_msg" ng-show="innerForm.input.$error.valid">
@@ -150,7 +150,11 @@
     <!-- /.navbar-static-side -->
 
     <div id="page-wrapper" ng-controller="WidgetController">
-        <br/>
+    <br/>
+        <div ng-if="message!=null" class="alert alert-warning">
+            {{message}}
+        </div>
+     
         <form id="editor" method=post action="/book/3">
             <input type='hidden' name='csrfmiddlewaretoken' value='9PKyuy0q1fW3fhcwExiYYJsSLjkMiobD' />
             <div class="panel panel-default">

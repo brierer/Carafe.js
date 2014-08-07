@@ -51,7 +51,10 @@ define([
         } else {
             exp = M(exp)
         }
-        var table = new Table(eqobj.manySearch(exp, [eqobj.getFunction("table", 0)]), table, id)
+        var expTable = eqobj.manySearch(exp, [eqobj.getFunction("table", 0)])
+        var table = new Table(expTable, function() {
+          return  eqobj.eqWrapper.toStrValue(expTable.val())
+        }, table, id)
 
         data.forEach(function(row, i) {
             row.forEach(function(cell, y) {
@@ -81,7 +84,7 @@ define([
     }
     Table.fromNative = function(exp, table, id) {
         var m = searchTable(exp, id)
-        var prettyData = eqobj.eqWrapper.toStrValue(m.val())
+        var prettyData = function() {return eqobj.eqWrapper.toStrValue(m.val())}
         return new Table(m, prettyData, table, id)
     }
 

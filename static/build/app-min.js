@@ -42933,9 +42933,10 @@ define("rickshaw", ["vendor/d3.layout.min","bootstrap"], function(){});
                 $this.find("li").not(".active").has("ul").children("ul").addClass("collapse");
             }
 
+            
             $this.find("li").has("ul").children("a").on("click", function (e) {
                 e.preventDefault();
-
+  
                 $(this).parent("li").toggleClass("active").children("ul").collapse("toggle");
 
                 if ($toggle) {
@@ -43446,511 +43447,756 @@ define('workspace/mquery',[], function() {
 });
 define('workspace/eqobj',["./mquery"], function(mquery) {
 
-	var eqWrapper = EqWrapper();
-
-
-	function EqWrapper() {
-		var eqObj = null
-		return {
-			toStr: function() {
-				return stringifyEqObj()
-			},
-			setEQ: function(eq) {
-				eqObj = eq;
-			},
-			getEQ: function() {
-				return eqObj;
-			},
-			isColReadOnly: isColReadOnly
-		}
-
-
-
-		function stringifyEqObj() {
-			var text = ""
-			for (var eq in eqObj) {
-				text += stringifyEquation(eqObj[eq]);
-			}
-			return text
-
-			function stringifyEquation(eq) {
-				return eq[0] + " = " + stringifyVal(eq[1]);
-			}
-
-			function stringifyVal(subTree) {
-				var s1, v, s2 = ""
-				s1 = subTree.s1
-				s2 = subTree.s2
-				var value = subTree.v
-				if (value.a !== undefined) {
-					v = stringifyArray(value.a)
-				} else if (value.f !== undefined) {
-					v = stringifyFunction(value.f)
-				} else if (value.o !== undefined) {
-					v = stringifyObj(value.o)
-				} else {
-					v = stringifyAtomicValue(value.tag, value.contents);
-				}
-				return s1 + v + s2
-			}
-
-			function stringifyArray(contents) {
-				var text = ""
-				contents.forEach(function(val, i) {
-					if (i != 0) {
-						text += ','
-					}
-					text += stringifyVal(val);;
-				})
-
-				return "[" + text + "]";
-			}
-
-
-			function stringifyFunction(f) {
-
-				if (f.arg.length == 0) {
-					return f.name;
-				} else {
-					var text = f.name + "("
-					var values = f.arg
-					values.forEach(function(val, i) {
-						if (i != 0) {
-							text += ','
-						}
-						text += stringifyVal(val);;
-					})
-					return text + ")";
-				}
-			}
-
-			function stringifyObj(contents) {
-				var text = ""
-				contents.forEach(function(content, i) {
-					if (i != 0) {
-						text += ','
-					}
-					tag = content[0];
-					value = stringifyVal(content[1]);
-					text += tag + ':' + value
-				});
-				return "{" + text + "}";
-			}
-
-			function stringifyAtomicValue(tag, contents) {
-				if (tag == "Pstring") {
-					return "\"" + contents + "\""
-				} else {
-					return contents
-				}
-			}
-		}
-	};
-
-	//search
-	function findEQ(name) {
-		var eq = eqWrapper.getEQ();
-		for (var i = 0; i < eq.length; i++) {
-			if (eq[i][0] == name) {
-				return eq[i][1]
-			}
-		}
-	}
-
-	function manySearch_(maybe, binds) {
-		var m
-		if (maybe.isNothing()) {
-			m = new M(null)
-		} else {
-			m = new M(maybe.val())
-		}
-		binds.forEach(function(fn, i) {
+    var eqWrapper = EqWrapper();
+
+
+    function EqWrapper() {
+        var eqObj = null
+        return {
+            toStr: function() {
+                return stringifyEqObj()
+            },
+            toStrValue: function(val) {
+            	return stringifyVal(val)
+            },
+            setEQ: function(eq) {
+                eqObj = eq;
+            },
+            getEQ: function() {
+                return eqObj;
+            },
+            isColReadOnly: isColReadOnly
+        }
+
+
+
+        function stringifyEqObj() {
+            var text = ""
+            for (var eq in eqObj) {
+                text += stringifyEquation(eqObj[eq]);
+            }
+            return text
+        }
+
+        function stringifyEquation(eq) {
+            return eq[0] + " = " + stringifyVal(eq[1]);
+        }
+
+        function stringifyVal(subTree) {
+            var s1, v, s2 = ""
+            s1 = subTree.s1
+            s2 = subTree.s2
+            var value = subTree.v
+            if (value.a !== undefined) {
+                v = stringifyArray(value.a)
+            } else if (value.f !== undefined) {
+                v = stringifyFunction(value.f)
+            } else if (value.o !== undefined) {
+                v = stringifyObj(value.o)
+            } else {
+                v = stringifyAtomicValue(value.tag, value.contents);
+            }
+            return s1 + v + s2
+        }
+
+        function stringifyArray(contents) {
+            var text = ""
+            contents.forEach(function(val, i) {
+                if (i != 0) {
+                    text += ','
+                }
+                text += stringifyVal(val);;
+            })
+
+            return "[" + text + "]";
+        }
+
+
+        function stringifyFunction(f) {
+
+            if (f.arg.length == 0) {
+                return f.name;
+            } else {
+                var text = f.name + "("
+                var values = f.arg
+                values.forEach(function(val, i) {
+                    if (i != 0) {
+                        text += ','
+                    }
+                    text += stringifyVal(val);;
+                })
+                return text + ")";
+            }
+        }
+
+        function stringifyObj(contents) {
+            var text = ""
+            contents.forEach(function(content, i) {
+                if (i != 0) {
+                    text += ','
+                }
+                tag = content[0];
+                value = stringifyVal(content[1]);
+                text += tag + ':' + value
+            });
+            return "{" + text + "}";
+        }
+
+        function stringifyAtomicValue(tag, contents) {
+            if (tag == "Pstring") {
+                return "\"" + contents + "\""
+            } else {
+                return contents
+            }
+        }
+
+    };
+
+    //search
+    function findEQ(name) {
+        var eq = eqWrapper.getEQ();
+        for (var i = 0; i < eq.length; i++) {
+            if (eq[i][0] == name) {
+                return eq[i][1]
+            }
+        }
+    }
+
+    function manySearch_(maybe, binds) {
+        var m
+        if (maybe.isNothing()) {
+            m = new M(null)
+        } else {
+            m = new M(maybe.val())
+        }
+        binds.forEach(function(fn, i) {
 
-			var b = new M(m.val())
-			m.app(isVariable)
-
-			if (m.isNothing()) {
-				maybe = b.app(fn);
-			} else {
-				maybe = new mquery.M(findEQ(m.val().name))
-				maybe.app(fn);
-			}
-			m = maybe
-			b = new M(m.val())
-
-		})
-
-		return maybe
-	}
-
-
-
-	function getDisplayItem_(eqObj, id) {
-		var m = new mquery.M(eqObj[0][1])
-		m.getFunction("show", 0).fwd(["v", "a"]).select(id)
-		return m
-	}
-
-	function getFunction(name, i) {
-		return function(eqObj) {
-			var m = new mquery.M(eqObj)
-			m.getFunction(name, i)
-			return m.val()
-		}
-
-	}
-
-	function getElemOfArray(i) {
-		return function(eqObj) {
-			var m = new mquery.M(eqObj)
-			m.fwd(['v', 'a']).select(i)
-			return m.val()
-		}
-	}
-
-
-
-	function isArray(eqObj) {
-		var m = new mquery.M(eqObj)
-		m.fwd(['v', 'a'])
-		return m.val()
-	}
-
-
-	function isVariable(eqObj) {
-		var m = new mquery.M(eqObj)
-		var b = new mquery.M(eqObj)
-		m.fwd(['v', 'f', 'arg']).compare('length', 0)
-		if (!m.maybe().isNothing()) {
-			return b.fwd(['v', 'f']).val()
-		}
-		return m.val()
-	}
-
-
-	function isAtomic(eqObj) {
-		var m = new mquery.M(eqObj)
-		m.getAtomic()
-		return m.val()
-	}
-
-	function isColReadOnly(row, col, item) {
-		var getElemAtCol = manySearch_(item, [getElemOfArray(col)])
-		if (getElemAtCol.isNothing()) {
-			return true
-		}
-		validArray = manySearch_(getElemAtCol, [isArray]);
-
-		if (!validArray.isNothing()) {
-			if (validArray.val().length - 1 < row) {
-				return false
-			} else {
-				return manySearch_(getElemAtCol, [getElemOfArray(row), isAtomic]).isNothing()
-			}
-
-		}
-
-		return true
-
-	}
-
-	//UPDATE
-
-	function addOrChangeValue(hook, item) {
-
-		var getCol = manySearch_(item, [getElemOfArray(hook.col), isArray])
-		addOrChangeAtomicValue(hook, getCol.val())
-	}
-
-
-
-	function addOrChangeAtomicValue(hook, subeqObj, eqObj) {
-		if (isVariable(subeqObj)) {
-			addOrChangeAtomicValue(hook, findEQ(subeqObj.v.f.name));
-		} else {
-			if (false) {
-				addAtomicValue(hook, subeqObj)
-			} else {
-				if (subeqObj[hook.row] != undefined) {
-					if (isVariable(subeqObj[hook.row])) {
-						var valueToChange = M(findEQ(subeqObj[hook.row].v.f.name).v);
-						changeVariable(hook.new, valueToChange);
-					} else {
-						var valueToChange = subeqObj[hook.row].v
-						changeAtomic(hook.new, valueToChange)
-					}
-				} else {
-					var nb = hook.row - subeqObj.length
-					for (var i = 0; i < nb; i++) {
-						pushVariable(hook.row, subeqObj, createEmptyVal())
-					}
-					addAtomicValue(hook, subeqObj)
-				}
-			}
-		}
-	}
-
-
-
-	function changeVariable(value, exp) {
-		val = exp.val()
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = M(findEQ(val.f.name).v);
-			changeVariable(value, valueToChange);
-		} else {
-			changeAtomicValue(value, exp.val())
-		}
-	}
-
-
-
-	function changeAtomic(newValue, val) {
-		var value = {}
-		if (newValue == "false" || newValue == "true") {
-			value = changePbool(newValue, val)
-		} else if (newValue != "" && !isNaN(newValue)) {
-			value = changePnum(newValue, val);
-		} else {
-			value = changePstring(newValue, val);
-		}
-	}
-
-	function changePbool(value, subeqObj) {
-		subeqObj.tag = 'Pbool'
-		if (value == "false")
-			subeqObj.contents = false
-		else {
-			subeqObj.contents = true
-		};
-	}
-
-	function changePstring(value, subeqObj) {
-		subeqObj.tag = 'Pstring'
-		subeqObj.contents = value
-	}
-
-	function changePnum(value, subeqObj) {
-		subeqObj.tag = 'Pnum'
-		subeqObj.contents = Number(value)
-	}
-
-
-	//REMOVE
-
-	function removeRow(row, item) {
-
-		data = manySearch_(item, [isArray])
-		if (!data.isNothing()) {
-			data.val().forEach(function(val, i) {
-				valueToDelete = new M(val);
-				if (!valueToDelete.fwd(['v']).isNothing()) {
-					removeFromVariable(row, valueToDelete);
-
-				}
-			})
-		}
-	}
-
-
-	function removeFromVariable(row, exp) {
-		var val = exp.val()
-
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = M(findEQ(val.f.name).v);
-			removeFromVariable(row, valueToChange);
-		} else {
-			val.a.splice(row - 1, 1);
-		}
-	}
-
-	function removeCol(col, exp) {
-		var val = exp.val()
-
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = M(findEQ(val.f.name).v);
-			removeCol(col, valueToChange);
-		} else {
-			console.log(col)
-			console.log(JSON.stringify(val))
-			val.v.a.splice(col, 1);
-			console.log(JSON.stringify(val))
-		}
-	}
-
-	//INSERT
-
-
-	function addVariable(row, exp, variable) {
-		var val = exp.val()
-
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = M(findEQ(val.f.name).v);
-			removeFromVariable(row, valueToChange);
-		} else {
-			val.a.splice(row, 0, variable);
-		}
-	}
-
-	function pushVariable(row, exp, variable) {
-		exp.push(variable)
-	}
-
-
-
-	function addRow(exp, row) {
-		data = manySearch_(exp, [isArray])
-		if (!data.isNothing()) data.val().forEach(function(val, i) {
-			valueToDelete = new M(val);
-			if (!valueToDelete.isNothing()) {
-				back = new M(val)
-				if (valueToDelete.fwd(["v", "f", "arg"]).compare("length", 0)) {
-					var valueToChange = M(findEQ(back.fwd(['v', 'f', 'name']).val()).v);
-					//valueToChange.log()
-					addVariable(row, valueToChange, createEmptyVal());
-				} else {
-					val.v.a.splice(row, 0, createEmptyVal());
-				}
-			}
-		})
-
-		//M(findEQ("y")).log()
-	}
-
-	function addCol(exp, col) {
-		exp.val().v.a.splice(col, 0, createArray());
-	}
-
-	function addAtomicValue(hook, subeqObj) {
-		var value = {}
-		if (hook.new == "false" || hook.new == "true") {
-			value = createVal(hook.new, subeqObj, changePbool)
-		} else if (hook.new != "" && !isNaN(hook.new)) {
-			value = createVal(hook.new, subeqObj, changePnum)
-		} else {
-			value = createVal(hook.new, subeqObj, changePstring)
-		}
-
-		var diff = hook.row - subeqObj.length - 1
-		while (diff >= 0) {
-			var empty = createVal("", subeqObj, changePstring)
-				//  subeqObj.push(empty);
-			diff--
-		}
-
-		subeqObj.push(value);
-	}
-
-
-	function createEmptyVal() {
-		return createString("");
-	}
-
-	function createVal(hook, subeqObj, fn) {
-		var value = {}
-		value.v = {};
-		fn(hook, value.v)
-		value.s1 = ""
-		value.s2 = ""
-		return value
-	}
-
-
-	function addEq(name, value) {
-		eqs = eqWrapper.getEQ();
-		eqs[eqs.length - 1][1].s2 = "\n";
-		eqs.push([name, value])
-		console.log(value)
-		return value
-	}
-
-	function createString(val) {
-		var value = {}
-		value.v = {
-			tag: "Pstring",
-			contents: val
-		};
-		value.s1 = ""
-		value.s2 = ""
-		return value
-	}
-
-	function createFunction(name, args) {
-		var v = {}
-		var f = {}
-		f = {
-			f: {
-				name: name,
-				arg: args
-			}
-		}
-		v = {
-			s1: "",
-			v: f,
-			s2: ""
-		}
-		return v
-	}
-
-	function createMatrix(col, row) {
-		var arr = []
-		for (var i = 0; i < col; i++) {
-			arr.push(createArray(row));
-		}
-		var v = {
-			a: arr
-		}
-		return {
-			s1: "",
-			v: v,
-			s2: ""
-		}
-	}
-
-	function createArray(nb) {
-		var arr = []
-		var v = {
-			a: arr
-		}
-		return {
-			s1: "",
-			v: v,
-			s2: ""
-		}
-	}
-
-	function createObject() {
-		return {
-			s1: "",
-			v: {
-				o: []
-			},
-			s2: ""
-		}
-	}
-
-	function addShow(eq) {
-		eqWrapper.getEQ()[0][1].v.f.arg[0].v.a.push(createFunction(eq, []));
-	}
-
-	return {
-		eqWrapper: eqWrapper,
-		addOrChangeValue: addOrChangeValue,
-		removeRow: removeRow,
-		isColReadOnly: isColReadOnly,
-		getDisplayItem: getDisplayItem_,
-		getFunction: getFunction,
-		manySearch: manySearch_,
-		addRow: addRow,
-		addCol: addCol,
-		addShow: addShow,
-		addEq: addEq,
-		removeCol: removeCol,
-		createFunction: createFunction,
-		createMatrix:createMatrix,
-		createObject:createObject,
-		createArray: createArray,
-	}
+            var b = new M(m.val())
+            m.app(isVariable)
+
+            if (m.isNothing()) {
+                maybe = b.app(fn);
+            } else {
+                maybe = new mquery.M(findEQ(m.val().name))
+                maybe.app(fn);
+            }
+            m = maybe
+            b = new M(m.val())
+
+        })
+
+        return maybe
+    }
+
+
+
+    function getDisplayItem_(eqObj, id) {
+        var m = new mquery.M(eqObj[0][1])
+        m.getFunction("show", 0).fwd(["v", "a"]).select(id)
+        return m
+    }
+
+    function getFunction(name, i) {
+        return function(eqObj) {
+            var m = new mquery.M(eqObj)
+            m.getFunction(name, i)
+            return m.val()
+        }
+
+    }
+
+    function getElemOfArray(i) {
+        return function(eqObj) {
+            var m = new mquery.M(eqObj)
+            m.fwd(['v', 'a']).select(i)
+            return m.val()
+        }
+    }
+
+
+
+    function isArray(eqObj) {
+        var m = new mquery.M(eqObj)
+        m.fwd(['v', 'a'])
+        return m.val()
+    }
+
+
+    function isVariable(eqObj) {
+        var m = new mquery.M(eqObj)
+        var b = new mquery.M(eqObj)
+        m.fwd(['v', 'f', 'arg']).compare('length', 0)
+        if (!m.maybe().isNothing()) {
+            return b.fwd(['v', 'f']).val()
+        }
+        return m.val()
+    }
+
+
+    function isAtomic(eqObj) {
+        var m = new mquery.M(eqObj)
+        m.getAtomic()
+        return m.val()
+    }
+
+    function isColReadOnly(row, col, item) {
+        var getElemAtCol = manySearch_(item, [getElemOfArray(col)])
+        if (getElemAtCol.isNothing()) {
+            return true
+        }
+        validArray = manySearch_(getElemAtCol, [isArray]);
+
+        if (!validArray.isNothing()) {
+            if (validArray.val().length - 1 < row) {
+                return false
+            } else {
+                return manySearch_(getElemAtCol, [getElemOfArray(row), isAtomic]).isNothing()
+            }
+
+        }
+
+        return true
+
+    }
+
+    //UPDATE
+
+    function addOrChangeValue(hook, item) {
+
+        var getCol = manySearch_(item, [getElemOfArray(hook.col), isArray])
+        addOrChangeAtomicValue(hook, getCol.val())
+    }
+
+
+
+    function addOrChangeAtomicValue(hook, subeqObj, eqObj) {
+        if (isVariable(subeqObj)) {
+            addOrChangeAtomicValue(hook, findEQ(subeqObj.v.f.name));
+        } else {
+            if (false) {
+                addAtomicValue(hook, subeqObj)
+            } else {
+                if (subeqObj[hook.row] != undefined) {
+                    if (isVariable(subeqObj[hook.row])) {
+                        var valueToChange = M(findEQ(subeqObj[hook.row].v.f.name).v);
+                        changeVariable(hook.new, valueToChange);
+                    } else {
+                        var valueToChange = subeqObj[hook.row].v
+                        changeAtomic(hook.new, valueToChange)
+                    }
+                } else {
+                    var nb = hook.row - subeqObj.length
+                    for (var i = 0; i < nb; i++) {
+                        pushVariable(hook.row, subeqObj, createEmptyVal())
+                    }
+                    addAtomicValue(hook, subeqObj)
+                }
+            }
+        }
+    }
+
+
+
+    function changeVariable(value, exp) {
+        val = exp.val()
+        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val.f.name).v);
+            changeVariable(value, valueToChange);
+        } else {
+            changeAtomicValue(value, exp.val())
+        }
+    }
+
+
+
+    function changeAtomic(newValue, val) {
+        var value = {}
+        if (newValue == "false" || newValue == "true") {
+            value = changePbool(newValue, val)
+        } else if (newValue != "" && !isNaN(newValue)) {
+            value = changePnum(newValue, val);
+        } else {
+            value = changePstring(newValue, val);
+        }
+    }
+
+    function changePbool(value, subeqObj) {
+        subeqObj.tag = 'Pbool'
+        if (value == "false")
+            subeqObj.contents = false
+        else {
+            subeqObj.contents = true
+        };
+    }
+
+    function changePstring(value, subeqObj) {
+        subeqObj.tag = 'Pstring'
+        subeqObj.contents = value
+    }
+
+    function changePnum(value, subeqObj) {
+        subeqObj.tag = 'Pnum'
+        subeqObj.contents = Number(value)
+    }
+
+
+    //REMOVE
+
+    function removeRow(row, item) {
+
+        data = manySearch_(item, [isArray])
+        if (!data.isNothing()) {
+            data.val().forEach(function(val, i) {
+                valueToDelete = new M(val);
+                if (!valueToDelete.fwd(['v']).isNothing()) {
+                    removeFromVariable(row, valueToDelete);
+
+                }
+            })
+        }
+    }
+
+
+    function removeFromVariable(row, exp) {
+        var val = exp.val()
+
+        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val.f.name).v);
+            removeFromVariable(row, valueToChange);
+        } else {
+            val.a.splice(row - 1, 1);
+        }
+    }
+
+    function removeCol(col, exp) {
+        var val = exp.val()
+
+        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val.f.name).v);
+            removeCol(col, valueToChange);
+        } else {
+            console.log(col)
+            console.log(JSON.stringify(val))
+            val.v.a.splice(col, 1);
+            console.log(JSON.stringify(val))
+        }
+    }
+
+    //INSERT
+
+
+    function addVariable(row, exp, variable) {
+        var val = exp.val()
+
+        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val.f.name).v);
+            removeFromVariable(row, valueToChange);
+        } else {
+            val.a.splice(row, 0, variable);
+        }
+    }
+
+    function pushVariable(row, exp, variable) {
+        exp.push(variable)
+    }
+
+
+
+    function addRow(exp, row) {
+        data = manySearch_(exp, [isArray])
+        if (!data.isNothing()) data.val().forEach(function(val, i) {
+            valueToDelete = new M(val);
+            if (!valueToDelete.isNothing()) {
+                back = new M(val)
+                if (valueToDelete.fwd(["v", "f", "arg"]).compare("length", 0)) {
+                    var valueToChange = M(findEQ(back.fwd(['v', 'f', 'name']).val()).v);
+                    //valueToChange.log()
+                    addVariable(row, valueToChange, createEmptyVal());
+                } else {
+                    val.v.a.splice(row, 0, createEmptyVal());
+                }
+            }
+        })
+
+        //M(findEQ("y")).log()
+    }
+
+    function addCol(exp, col) {
+        exp.val().v.a.splice(col, 0, createArray());
+    }
+
+    function addAtomicValue(hook, subeqObj) {
+        var value = {}
+        if (hook.new == "false" || hook.new == "true") {
+            value = createVal(hook.new, subeqObj, changePbool)
+        } else if (hook.new != "" && !isNaN(hook.new)) {
+            value = createVal(hook.new, subeqObj, changePnum)
+        } else {
+            value = createVal(hook.new, subeqObj, changePstring)
+        }
+
+        var diff = hook.row - subeqObj.length - 1
+        while (diff >= 0) {
+            var empty = createVal("", subeqObj, changePstring)
+                //  subeqObj.push(empty);
+            diff--
+        }
+
+        subeqObj.push(value);
+    }
+
+
+    function createEmptyVal() {
+        return createString("");
+    }
+
+    function createVal(hook, subeqObj, fn) {
+        var value = {}
+        value.v = {};
+        fn(hook, value.v)
+        value.s1 = ""
+        value.s2 = ""
+        return value
+    }
+
+
+    function addEq(name, value) {
+        eqs = eqWrapper.getEQ();
+        eqs[eqs.length - 1][1].s2 = "\n";
+        eqs.push([name, value])
+        console.log(value)
+        return value
+    }
+
+    function createString(val) {
+        var value = {}
+        value.v = {
+            tag: "Pstring",
+            contents: val
+        };
+        value.s1 = ""
+        value.s2 = ""
+        return value
+    }
+
+    function createFunction(name, args) {
+        var v = {}
+        var f = {}
+        f = {
+            f: {
+                name: name,
+                arg: args
+            }
+        }
+        v = {
+            s1: "",
+            v: f,
+            s2: ""
+        }
+        return v
+    }
+
+    function createMatrix(col, row) {
+        var arr = []
+        for (var i = 0; i < col; i++) {
+            arr.push(createArray(row));
+        }
+        var v = {
+            a: arr
+        }
+        return {
+            s1: "",
+            v: v,
+            s2: ""
+        }
+    }
+
+    function createArray(nb) {
+        var arr = []
+        var v = {
+            a: arr
+        }
+        return {
+            s1: "",
+            v: v,
+            s2: ""
+        }
+    }
+
+    function createObject() {
+        return {
+            s1: "",
+            v: {
+                o: []
+            },
+            s2: ""
+        }
+    }
+
+    function addShow(eq) {
+        eqWrapper.getEQ()[0][1].v.f.arg[0].v.a.push(createFunction(eq, []));
+    }
+
+    return {
+        eqWrapper: eqWrapper,
+        addOrChangeValue: addOrChangeValue,
+        removeRow: removeRow,
+        isColReadOnly: isColReadOnly,
+        getDisplayItem: getDisplayItem_,
+        getFunction: getFunction,
+        manySearch: manySearch_,
+        addRow: addRow,
+        addCol: addCol,
+        addShow: addShow,
+        addEq: addEq,
+        removeCol: removeCol,
+        createFunction: createFunction,
+        createMatrix: createMatrix,
+        createObject: createObject,
+        createArray: createArray,
+    }
+})
+;
+define('workspace/evaluator',["./eqobj"], function(eqobj) {
+
+    var isCalculatingWaiting = false;
+
+    var startTime = new Date().getTime();
+
+
+    function eqEvaluation(fn) {
+        $('#invisible-wrapper').css("visibility", "visible");
+        startTime = new Date().getTime();
+        var formData = $("form").serialize();
+        isCalculatingWaiting = true;
+        $.post('postCalcResult', formData, function() {
+            initPollingGetCalcResult(fn);
+        });
+    };
+
+
+    function initPollingGetCalcResult(fn) {
+        setTimeout(function() {
+            pollingServerCalcGetResult(0,fn);
+        }, 10);
+    }
+
+    function pollingServerCalcGetResult(nbTry,fn) {
+        if (nbTry < 5) {
+            var id_form = $("#id_form_id").serialize();
+            var id_book = $("#id_book_id").serialize();
+            $.getJSON('getCalcResult/?' + id_form, function(r) {
+                var now = new Date().getTime();
+                var timesRun = nbTry;
+                console.log('Action ' + (timesRun + 1) + ' started ' + (now - startTime) + 'ms after script start');
+                if (r != null) {
+                    eqobj.eqWrapper.setEQ(r.parse)
+                    fn(r);
+                    isCalculatingWaiting = false;
+                } else {
+                    setTimeout(function() {
+                        pollingServerCalcGetResult(nbTry + 1)
+                    }, 10);
+                }
+            });
+        } else {
+            console.log("Hummm, this is long , very long");
+            isCalculatingWaiting = false;
+        }
+    }
+    return {
+        'initPollingGetCalcResult': initPollingGetCalcResult,
+        'eqEvaluation': eqEvaluation
+    };
+
 });
+
+define('workspace/handsontable-fabric',[
+    "jquery.handsontable.full",
+], function() {
+
+    return {
+        HDT_fabric: HDT_fabric
+    }
+
+    function HDT_fabric(table, updateEditorText, data, container) {
+
+        this.options = {
+            data: table.data,
+            colHeaders: table.param.col == null ? true : table.param.col,
+            minSpareRows: 1,
+            stretchH: 'all',
+            width: Math.min(75 * table.data[0].length - 1, 750),
+            colWidths: 25,
+            cells: table.cells,
+            afterChange: afterChange,
+            afterRemoveRow: afterRemoveRow,
+            afterRemoveCol: afterRemoveCol,
+            afterCreateRow: afterCreateRow,
+            afterCreateCol: afterCreateCol,
+            afterSelection: function(r, c, r1, c2) {
+                var hook = [r, c, r1, c2]
+                if (r1 < this.countRows() - 2) {
+                    data.fnAfterChange("select(" + table.prettyData() + "," + hook + ")")
+                } else {
+                    data.fnAfterChange("col(" + table.prettyData() + "," + c + ")")
+                }
+            },
+            contextMenu: {
+
+                items: {
+                    "row_above": {
+                        disabled: function() {
+                            return (Math.min(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 1);
+                        }
+                    },
+                    "row_below": {
+                        disabled: function() {
+                            return (Math.max(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 2);
+                        }
+                    },
+                    "remove_row": {
+                        disabled: function() {
+                            return (Math.max(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 1);
+                        }
+                    },
+                    "hsep1": "---------",
+                    "col_left": {},
+                    "col_right": {},
+                    "remove_col": {}
+
+                }
+            },
+            afterGetColHeader: function(col, TH) {
+                var instance = this;
+
+                var $button = $(buildButton(col));
+                $button.click(function(event) {
+                    var num = Number($button.attr("nb"))
+                    instance.selectCell(0, num, instance.countRows() - 2, num, true)
+                   // container.find("input:not(:eq(" + col + "))").attr('checked', false)
+                });
+
+
+                TH.firstChild.appendChild($button[0]);
+
+                //TH.appendChild(menu[0]);
+            },
+        }
+
+        //EVENT
+        function afterCreateCol(index, number) {
+            table.event.afterCreateCol(index, number);
+            this.updateSettings({
+                width: Math.min(75 * table.data[0].length, 750)
+            })
+            updateEditorText();
+        }
+
+        function afterRemoveCol(col) {
+            var selection = this.getSelected()
+            var colBegin = selection[0]
+            var colEnd = selection[2]
+            if (colBegin > colEnd) {
+                var temp = colEnd;
+                colEnd = colBegin;
+                colBegin = temp;
+            }
+            for (var i = colBegin; i <= colEnd; i++) {
+                table.event.afterRemoveCol(col);
+            }
+
+            updateEditorText();
+        }
+
+        function afterCreateRow(index, number) {
+
+            if (index < this.countRows() - 1)
+                table.event.afterCreateRow(index, number);
+            updateEditorText();
+        }
+
+        function afterRemoveRow(row) {
+            var selection = this.getSelected()
+            var rowBegin = selection[0]
+            var rowEnd = selection[2]
+            if (rowBegin > rowEnd) {
+                var temp = rowEnd;
+                rowEnd = rowBegin;
+                rowBegin = temp;
+            }
+            for (var i = rowBegin; i <= rowEnd; i++) {
+                var gt = row >= this.countRows()
+                var rowToDelete = gt ? row : row + 1
+                    //if (row < this.countRows())
+                table.event.afterRemoveRow(rowToDelete);
+            }
+
+            updateEditorText()
+        }
+
+        function afterChange(hooks) {
+            var handsontable = this
+            if (hooks != null) {
+                hooks.forEach(function(hook, i) {
+                    changeCell(handsontable, hook)
+                })
+            }
+            updateEditorText()
+        }
+        //HELPER
+        function changeCell(handsontable, hook) {
+            var row = hook[0];
+            var col = hook[1];
+            var old_value = hook[2]
+            var new_value = hook[3]
+
+            if (row < handsontable.countRows() - 1)
+                table.event.afterChange({
+                    'row': row,
+                    'col': col,
+                    'old': old_value,
+                    'new': new_value
+                });
+
+        }
+
+
+
+        function convertNullBeforeEndToEmptyString(that, table, row, col) {
+            for (var i = 0; i < row; i++) {
+                if (table.getDataAtCell(i, col) == null && i < table.countRows() - 1) {
+                    //console.log(row)
+                    that.event.afterChange({
+                        'row': row,
+                        'col': col,
+                        'old': null,
+                        'new': ""
+                    });
+                }
+            }
+        }
+
+        function buildButton(col) {
+            var check = "<button  type='button' style='margin-left:10px' class='btn btn-xs btn-default' type='checkbox' ";
+            check += "nb=" + col
+            check += ">&#8597</button>"
+            return check
+        }
+
+
+
+        function setEmptyStringNull(table) {
+            var cells = table.getDataAtRow(table.countRows() - 1);
+            cells.forEach(function(val, i) {
+                if (val == "") {
+                    table.setDataAtCell(table.countRows() - 1, i, null)
+                }
+            })
+        }
+    }
+});
+
 define('workspace/rickshaw-fabric',[
   "rickshaw",
 ], function() {
@@ -44006,161 +44252,6 @@ return {Rickshaw_fabric:Rickshaw_fabric}
 }
 
 );
-define('workspace/handsontable-fabric',[
-	"jquery.handsontable.full",
-], function() {
-
-	return {
-		HDT_fabric: HDT_fabric
-	}
-
-	function HDT_fabric(table, updateEditorText) {
-
-		this.options = {
-			data: table.data,
-			colHeaders: table.param.col == null ? true : table.param.col,
-			minSpareRows: 1,
-			stretchH: 'all',
-			width: Math.min(75 * table.data[0].length-1, 750),
-			colWidths:25,
-			cells: table.cells,
-			afterChange: afterChange,
-			afterRemoveRow: afterRemoveRow,
-			afterRemoveCol: afterRemoveCol,
-			afterCreateRow: afterCreateRow,
-			afterCreateCol: afterCreateCol,
-			contextMenu: {
-
-				items: {
-					"row_above": {
-						disabled: function() {
-							return (Math.min(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 1);
-						}
-					},
-					"row_below": {
-						disabled: function() {
-							return (Math.max(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 2);
-						}
-					},
-					"remove_row": {
-						disabled: function() {
-							return (Math.max(this.getSelected()[2], this.getSelected()[0]) >= this.countRows() - 1);
-						}
-					},
-					"hsep1": "---------",
-					"col_left": {},
-					"col_right": {},
-					"remove_col": {}
-
-				}
-			}
-		}
-
-		//EVENT
-		function afterCreateCol(index, number) {
-			table.event.afterCreateCol(index, number);
-			this.updateSettings({
-				width: Math.min(75 * table.data[0].length, 750)
-			})
-			updateEditorText();
-		}
-
-		function afterRemoveCol(col) {
-			var selection = this.getSelected()
-			var colBegin = selection[0]
-			var colEnd = selection[2]
-			if (colBegin > colEnd) {
-				var temp = colEnd;
-				colEnd = colBegin;
-				colBegin = temp;
-			}
-			for (var i = colBegin; i <= colEnd; i++) {
-				table.event.afterRemoveCol(col);
-			}
-
-			updateEditorText();
-		}
-
-		function afterCreateRow(index, number) {
-
-			if (index < this.countRows() - 1)
-				table.event.afterCreateRow(index, number);
-			updateEditorText();
-		}
-
-		function afterRemoveRow(row) {
-			var selection = this.getSelected()
-			var rowBegin = selection[0]
-			var rowEnd = selection[2]
-			if (rowBegin > rowEnd) {
-				var temp = rowEnd;
-				rowEnd = rowBegin;
-				rowBegin = temp;
-			}
-			console.log([rowBegin,rowEnd])
-			for (var i = rowBegin; i <= rowEnd; i++) {
-				var gt = row >= this.countRows()
-				var rowToDelete = gt ? row : row + 1
-				//if (row < this.countRows())
-					table.event.afterRemoveRow(rowToDelete);
-			}
-
-			updateEditorText()
-		}
-
-		function afterChange(hooks) {
-			var handsontable = this
-			if (hooks != null) {
-				hooks.forEach(function(hook, i) {
-					changeCell(handsontable, hook)
-				})
-			}
-			updateEditorText()
-		}
-		//HELPER
-		function changeCell(handsontable, hook) {
-			var row = hook[0];
-			var col = hook[1];
-			var old_value = hook[2]
-			var new_value = hook[3]
-		
-			if (row < handsontable.countRows() - 1)
-				table.event.afterChange({
-					'row': row,
-					'col': col,
-					'old': old_value,
-					'new': new_value
-				});
-
-		}
-
-
-
-		function convertNullBeforeEndToEmptyString(that, table, row, col) {
-			for (var i = 0; i < row; i++) {
-				if (table.getDataAtCell(i, col) == null && i < table.countRows() - 1) {
-					//console.log(row)
-					that.event.afterChange({
-						'row': row,
-						'col': col,
-						'old': null,
-						'new': ""
-					});
-				}
-			}
-		}
-
-
-		function setEmptyStringNull(table) {
-			var cells = table.getDataAtRow(table.countRows() - 1);
-			cells.forEach(function(val, i) {
-				if (val == "") {
-					table.setDataAtCell(table.countRows() - 1, i, null)
-				}
-			})
-		}
-	}
-});
 define('workspace/table',[
     "./eqobj",
     "./mquery"
@@ -44168,8 +44259,9 @@ define('workspace/table',[
 
 
 
-    function Table(exp, table, id) {
+    function Table(exp, prettyData, table, id) {
         this.data = table.data
+        this.prettyData = prettyData
         this.param = table.p
         this.parse = exp
         this.id = id
@@ -44203,15 +44295,7 @@ define('workspace/table',[
         }
         console.log(this.param)
     };
-    /*function removeFromVariable(row, exp) {
-		var val = exp.val()
-		if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-			var valueToChange = findEQ(val.f.name).v;
-			removeFromVariable(row, valueToChange, eqObj);
-		} else {
-			exp.val().a.splice(row - 1, 1);
-		}
-	}*/
+
 
 
     Table.fromArray = function(exp, data, id, header) {
@@ -44221,7 +44305,10 @@ define('workspace/table',[
         } else {
             exp = M(exp)
         }
-        var table = new Table(eqobj.manySearch(exp, [eqobj.getFunction("table", 0)]), table, id)
+        var expTable = eqobj.manySearch(exp, [eqobj.getFunction("table", 0)])
+        var table = new Table(expTable, function() {
+          return  eqobj.eqWrapper.toStrValue(expTable.val())
+        }, table, id)
 
         data.forEach(function(row, i) {
             row.forEach(function(cell, y) {
@@ -44251,7 +44338,8 @@ define('workspace/table',[
     }
     Table.fromNative = function(exp, table, id) {
         var m = searchTable(exp, id)
-        return new Table(m, table, id)
+        var prettyData = function() {return eqobj.eqWrapper.toStrValue(m.val())}
+        return new Table(m, prettyData, table, id)
     }
 
     function searchTable(exp, id) {
@@ -44274,257 +44362,259 @@ define('workspace/widget',[
         "./handsontable-fabric",
         "./chart",
         "./table",
-        "./carafe-scheme"
+        "./evaluator",
+        "./carafe-scheme",
     ],
     function(
         eqobj,
         rickshaw_fabric,
         handsontable_fabric,
         chart,
-        table) {
+        table,
+        evaluator) {
 
-
-        var editor;
-
-        function displayData(data) {
-
-            if (data.parse !== undefined) {
-                updateEditorText()
-                if (data.eval.statut == "ok") {
-                    displayWidgetFactory(data.parse, data.eval.res);
-                } else if (data.statut == 'tko') {
-                    displayBadEval(data.eval);
-                } else if (data.statut == 'ko') {
-                    displayError(data.eval);
-                }
-            }
-        }
-
-
-        function displayError(data) {
-            var html = "";
-            html += data.res;
-            html += "<br/>"
-            html += JSON.stringify(data.stack);
-            $("#containment-wrapper").html(html);
-        }
-
-        function displayBadEval(data) {
-            var html = "";
-            html += data.res;
-            html += "<br/>"
-            html += JSON.stringify(data.stack);
-            $("#containment-wrapper").html(html);
-        }
-
-
-
-        function displayWidgetFactory(parse, data) {
-            var html = "";
-            $("#containment-wrapper").html(html);
-            $(data).each(function(id, d) {
-                if (this instanceof Array) {
-                    displayOneTable(table.Table.fromArray(parse, this, id));
-                }
-                if (this.type == 'table') {
-                    displayOneTable(table.Table.fromNative(parse, this, id));
-                }
-                if (this.type == 'graph') {
-                    displayChart(chart.Chart.fromNative(this));
-                }
-            })
-
-            setWidget();
-            $('#invisible-wrapper').css("visibility", "hidden");
-
-        }
-
-        function displayChart(chart) {
-
-            $("#containment-wrapper").append("<div class='chart-container ui-widget-content draggable'><div class='chart-title'></div><div id='y_axis'></div><div id='chart' class='chart'></div><div id='x_axis'></div></div>")
-
-            var graph = rickshaw_fabric.Rickshaw_fabric(chart, {
-                chart: document.querySelector("#chart"),
-                x_axis: document.querySelector("#x_axis"),
-                y_axis: document.querySelector("#y_axis")
-            });
-            graph.render();
-            $(".chart-title").html(chart.param.title);
-        }
-
-
-        function displayOneTable(table) {
-            $("#containment-wrapper").append("<div class='table-container ui-widget-content draggable'><div class='handsontable-wrapper'></div<</div>")
-            console.log(table.width)
-            $('#containment-wrapper div').last().outerWidth(table.width);
-            var handsontable = new handsontable_fabric.HDT_fabric(table, updateEditorText)
-            var tableAdd = $('#containment-wrapper div.handsontable-wrapper').last()
-            tableAdd.handsontable(handsontable.options);
-        }
-
-
-        function updateEditorText() {
-            editor.getDoc().setValue(eqobj.eqWrapper.toStr());
-            editor.save();
-        }
-
-
-        function setWidget() {
-            setDraggableWidget();
-            setIconTable();
-        }
-
-        function setDraggableWidget() {
-            $(".ui-widget-content").draggable({
-                containment: "parent",
-                handle: "thead"
-            });
-        }
-
-        function setIconTable() {
-            $("th").find("i").click(function(e) {
-
-                var $contextMenu = $("#contextMenu");
-
-
-                $contextMenu.css({
-                    display: "block",
-                    left: e.pageX,
-                    top: e.pageY
-                });
-
-
-                $contextMenu.on("click", "a", function() {
-                    $contextMenu.hide();
-                });
-                var contextVisible = false;
-
-                $("#dashboard").click(function() {
-                    if (contextVisible) {
-                        $contextMenu.hide();
-                        contextVisible = false;
-                        $("#dashboard").unbind();
-                    } else {
-                        contextVisible = true;
+        function init(app) {
+            var editor;
+            app.factory("WidgetService", function() {
+                var data = {
+                    fnAfterChange: function(v) {
+                        return "widget"
                     }
-                });
+                }
+                var message = {
+                    fn: function() {
+                        return ""
+                    }
+                }
 
+
+                function displayData(data) {
+                    if (data != null && data.parse !== undefined) {
+                        updateEditorText()
+                        if (data.eval.statut == "ok") {
+                            displayWidgetFactory(data.parse, data.eval.res);
+                            message.fn("")
+                        } else if (data.statut == 'tko') {
+                            displayBadEval(data.eval);
+                        } else if (data.statut == 'ko') {
+                            displayError(data.eval);
+                        }
+                    }
+                }
+
+
+
+                function displayError(data) {
+                    var html = "";
+                    html += data.res;
+                    html += "<br/>"
+                    html += JSON.stringify(data.stack);
+                    $("#containment-wrapper").html(html);
+                }
+
+                function displayBadEval(data) {
+                    var html = "";
+                    html += data.res;
+                    html += "<br/>"
+                    html += JSON.stringify(data.stack);
+                    $("#containment-wrapper").html(html);
+                }
+
+
+
+                function displayWidgetFactory(parse, data) {
+                    var html = "";
+                    $("#containment-wrapper").html(html);
+                    $(data).each(function(id, d) {
+                        if (this instanceof Array) {
+                            displayOneTable(table.Table.fromArray(parse, this, id));
+                        }
+                        if (this.type == 'table') {
+                            displayOneTable(table.Table.fromNative(parse, this, id));
+                        }
+                        if (this.type == 'graph') {
+                            displayChart(chart.Chart.fromNative(this));
+                        }
+                    })
+
+                    setWidget();
+                    $('#invisible-wrapper').css("visibility", "hidden");
+
+                }
+
+                function displayChart(chart) {
+
+                    $("#containment-wrapper").append("<div class='chart-container ui-widget-content draggable'><div class='chart-title'></div><div id='y_axis'></div><div id='chart' class='chart'></div><div id='x_axis'></div></div>")
+
+                    var graph = rickshaw_fabric.Rickshaw_fabric(chart, {
+                        chart: document.querySelector("#chart"),
+                        x_axis: document.querySelector("#x_axis"),
+                        y_axis: document.querySelector("#y_axis")
+                    });
+                    graph.render();
+                    $(".chart-title").html(chart.param.title);
+                }
+
+
+                function displayOneTable(table) {
+                    $("#containment-wrapper").append("<div class='table-container ui-widget-content draggable'><div class='handsontable-wrapper'></div<</div>")
+                    $('#containment-wrapper div').last().outerWidth(table.width);
+                    var handsontable = new handsontable_fabric.HDT_fabric(table, updateEditorText, data, $("#containment-wrapper"))
+                    var tableAdd = $('#containment-wrapper div.handsontable-wrapper').last()
+                    tableAdd.handsontable(handsontable.options);
+                }
+
+
+                function updateEditorText() {
+                    editor.getDoc().setValue(eqobj.eqWrapper.toStr());
+                    editor.save();
+                }
+
+                function addToEditorText(value) {
+                    var preText = editor.getDoc().getValue()
+                    $('#invisible-wrapper').css("visibility", "visible");
+                    if (message.fn != null) message.fn("Please, reload the page with GO!")
+                    editor.getDoc().setValue(preText + value)
+                }
+
+                function setWidget() {
+                    setDraggableWidget();
+                    setIconTable();
+                }
+
+                function setDraggableWidget() {
+                    $(".ui-widget-content").draggable({
+                        containment: "parent",
+                        handle: "thead"
+                    });
+                }
+
+                function setIconTable() {
+                    $("th").find("i").click(function(e) {
+
+                        var $contextMenu = $("#contextMenu");
+
+
+                        $contextMenu.css({
+                            display: "block",
+                            left: e.pageX,
+                            top: e.pageY
+                        });
+
+
+                        $contextMenu.on("click", "a", function() {
+                            $contextMenu.hide();
+                        });
+                        var contextVisible = false;
+
+                        $("#dashboard").click(function() {
+                            if (contextVisible) {
+                                $contextMenu.hide();
+                                contextVisible = false;
+                                $("#dashboard").unbind();
+                            } else {
+                                contextVisible = true;
+                            }
+                        });
+
+                    });
+
+
+                    $("th").mouseover(function() {
+                        $(this).find("i").removeClass("hidden");
+                    });
+                    $("th").mouseout(function() {
+                        $(this).find("i").addClass("hidden");
+                    });
+
+                }
+
+
+                function addTable(name, nbcol) {
+                    var nbCol = parseInt(nbcol)
+                    var arr = new Array(nbCol);
+
+                    for (var a = []; a.length < 1; a.push(arr.slice(0)));
+
+
+                    var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
+
+                    var eqs = eqobj.addEq(name, f)
+                    eqobj.addShow(name)
+                    displayOneTable(table.Table.fromArray(eqs, a, null))
+                    setWidget();
+                }
+
+                function addTableWithData(name, data, header) {
+                    var a = data
+                    var nbCol = data[0].length
+                    var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
+
+                    var eqs = eqobj.addEq(name, f)
+                    eqobj.addShow(name)
+                    displayOneTable(table.Table.fromArray(eqs, a, null, header))
+                    setWidget();
+                }
+
+                function setEditor() {
+
+
+                    editor = CodeMirror.fromTextArea(document.getElementById("id_equations"), {
+                        mode: "haskell",
+                        lineNumbers: true,
+                        theme: "elegant",
+                        onKeyEvent: function(editor, event) {
+                            $('#invisible-wrapper').css("visibility", "visible");
+                            if (message.fn != null) message.fn("Please, reload the page with GO!")
+                        }
+
+                    });
+
+                    $("#editor").css("visibility", "visible");
+                    return editor
+
+                }
+                return {
+                    data: data,
+                    message: message,
+                    displayData: displayData,
+                    addTable: addTable,
+                    addTableWithData: addTableWithData,
+                    addToEditorText: addToEditorText,
+                    editor: setEditor()
+                }
             });
 
 
-            $("th").mouseover(function() {
-                $(this).find("i").removeClass("hidden");
-            });
-            $("th").mouseout(function() {
-                $(this).find("i").addClass("hidden");
-            });
+            app.controller('WidgetController',
+                function($scope, WidgetService) {
+                    $scope.WidgetService = WidgetService
+                    WidgetService.message.fn = function(msg) {
+                        $scope.message = msg
+                        $scope.$apply()
+                    }
+                    $scope.update = function() {
+                        $scope.WidgetService.editor.save()
+                        evaluator.eqEvaluation($scope.updateData)
 
+                    }
+
+                    $scope.updateData = function(data) {
+                        $scope.data = data
+                        $scope.WidgetService.displayData(data)
+                    }
+
+                    evaluator.initPollingGetCalcResult($scope.updateData)
+
+                }
+
+            )
         }
 
-
-        function addTable(name, nbcol) {
-            var nbCol = parseInt(nbcol)
-            var arr = new Array(nbCol);
-
-            for (var a = []; a.length < 1; a.push(arr.slice(0)));
-
-
-            var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
-
-            var eqs = eqobj.addEq(name, f)
-            eqobj.addShow(name)
-            displayOneTable(table.Table.fromArray(eqs, a, null))
-            setWidget();
-        }
-
-        function addTableWithData(name, data, header) {
-            var a = data
-            var nbCol = data[0].length              
-            var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
-
-            var eqs = eqobj.addEq(name, f)
-            eqobj.addShow(name)
-            displayOneTable(table.Table.fromArray(eqs, a, null, header))
-            setWidget();
-        }
-
-        function setEditor() {
-
-
-            editor = CodeMirror.fromTextArea(document.getElementById("id_equations"), {
-                mode: "haskell",
-                lineNumbers: true,
-                theme: "elegant"
-
-            });
-
-            $("#editor").css("visibility", "visible");
-            return editor
-
-        }
         return {
-            displayData: displayData,
-            addTable: addTable,
-            addTableWithData: addTableWithData,
-            editor: setEditor()
+            init: init
         }
     });
-
-define('workspace/evaluator',["./eqobj", "./widget"], function(eqobj, widget) {
-
-    var isCalculatingWaiting = false;
-
-    var startTime = new Date().getTime();
-
-
-    function eqEvaluation() {
-        $('#invisible-wrapper').css("visibility", "visible");
-        startTime = new Date().getTime();
-        console.log(widget)
-        widget.editor.save();
-        var formData = $("form").serialize();
-        isCalculatingWaiting = true;
-        $.post('postCalcResult', formData, function() {
-            initPollingGetCalcResult();
-        });
-    };
-
-
-    function initPollingGetCalcResult() {
-        setTimeout(function() {
-            pollingServerCalcGetResult(0);
-        }, 10);
-    }
-
-    function pollingServerCalcGetResult(nbTry) {
-        if (nbTry < 5) {
-            var id_form = $("#id_form_id").serialize();
-            var id_book = $("#id_book_id").serialize();
-            $.getJSON('getCalcResult/?' + id_form, function(r) {
-                var now = new Date().getTime();
-                var timesRun = nbTry;
-                console.log('Action ' + (timesRun + 1) + ' started ' + (now - startTime) + 'ms after script start');
-                if (r.data != null) {
-                    eqobj.eqWrapper.setEQ(r.data.parse)
-                    widget.displayData(r.data);
-                    isCalculatingWaiting = false;
-                } else {
-                    setTimeout(function() {
-                        pollingServerCalcGetResult(nbTry + 1)
-                    }, 10);
-                }
-            });
-        } else {
-            console.log("Hummm, this is long , very long");
-            isCalculatingWaiting = false;
-        }
-    }
-    return {
-        'initPollingGetCalcResult': initPollingGetCalcResult,
-        'eqEvaluation': eqEvaluation
-    };
-
-});
 
 define('workspace/fnList',["./widget"], function(widget) {
 
@@ -44585,7 +44675,7 @@ define('workspace/fnList',["./widget"], function(widget) {
                         'validation': validations.v_integer
                     }
                 },
-                'callback': function(fn) {
+                'callback': function(fn, widget) {
                     widget.addTable(this.variable_name, fn.nbcol.value)
                 }
             }),
@@ -44604,7 +44694,7 @@ define('workspace/fnList',["./widget"], function(widget) {
                         'validation': null
                     }
                 },
-                'callback': function(fn) {
+                'callback': function(fn, widget) {
                     var reader = new FileReader()
                     var variable_name = this.variable_name
                     reader.onload = function(e) {
@@ -44630,8 +44720,8 @@ define('workspace/fnList',["./widget"], function(widget) {
                         'validation': null
                     }
                 },
-                'callback': function(fn) {
-                    processURL(this.variable_name, fn)
+                'callback': function(fn ,widget) {
+                    processURL(this.variable_name, fn , widget)
                 }
             })
         ]),
@@ -44644,8 +44734,8 @@ define('workspace/fnList',["./widget"], function(widget) {
                     'title': 'y',
                     'validation': validations.v_float
                 }],
-                'callback': function() {
-                    alert("asdf")
+                'callback': function(fn , widget) {
+                   widget.addToEditorText(defaut_fn("sum", fn))
                 }
             }),
             SubList("Stats", [FunctionCreator({
@@ -44658,7 +44748,6 @@ define('workspace/fnList',["./widget"], function(widget) {
                     'validation': validations.v_float
                 }],
                 'callback': function() {
-                    alert("asdf")
                 }
             })])
         ])
@@ -44666,12 +44755,11 @@ define('workspace/fnList',["./widget"], function(widget) {
 
 
     function valid_file(value) {
-        console.log("YO")
-        console.log((value.srcElement || value.target).files[0])
         return value
     }
 
     function valid_float(value) {
+        if (value[0]=="=") return value
         var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
         if (FLOAT_REGEXP.test(value)) {
             return parseFloat(value.replace(',', '.'));
@@ -44681,6 +44769,7 @@ define('workspace/fnList',["./widget"], function(widget) {
     }
 
     function valid_integer(value) {
+        if (value[0]=="=") return value
         var REGEXP = /^\-?\d+$/;
         return REGEXP.test(value)
     }
@@ -44729,8 +44818,19 @@ define('workspace/fnList',["./widget"], function(widget) {
         console.log(JSON.stringify(file))
     }
 
+    function defaut_fn(name,arg){
+        var txt = name + "("
+        arg.forEach(function (e,i){
+            console.log(JSON.stringify(e))
+            txt += e.value
+            if (i!=arg.length-1)
+                txt += ','
+        })    
+        txt += ')'
+        return txt
+    }
 
-    function processURL(variable_name, fn) {
+    function processURL(variable_name, fn , widget) {
 
         // Create the XHR object.
         function createCORSRequest(method, url) {
@@ -44805,109 +44905,131 @@ define('workspace/fnList',["./widget"], function(widget) {
 })
 ;
 define('workspace/generator',["jquery", "validator", "./fnList"], function($, validator, fnList) {
-    var app = angular.module('myApp', []);
-    var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
-    app.directive('smartFloat', function() {
-        return {
-            require: 'ngModel',
-            scope: {
-                fn: '&smartFloat'
-            },
-            link: function(scope, elm, attrs, ctrl) {
-                if (scope.fn != null && scope.fn() != null) {
-                    var valid_fn = scope.fn().fn
 
-                    ctrl.$parsers.unshift(function(viewValue) {
-                        if (viewValue == undefined || viewValue.length == 0) {
-                            ctrl.$setValidity('valid', true)
-                            return viewValue
-                        }
-                        var valid_value = valid_fn(viewValue)
-                        if (typeof valid_value == "boolean") {
-                            ctrl.$setValidity('valid', valid_value);
-                            return viewValue
-                        } else {
-                            ctrl.$setValidity('valid', valid_value !== undefined);
-                            return valid_value;
-                        }
+    function init(app) {
+
+        var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+        app.directive('smartFloat', function() {
+            return {
+                require: 'ngModel',
+                scope: {
+                    fn: '&smartFloat'
+                },
+                link: function(scope, elm, attrs, ctrl) {
+                    if (scope.fn != null && scope.fn() != null) {
+                        var valid_fn = scope.fn().fn
+                        ctrl.$parsers.unshift(function(viewValue) {
+                            if (viewValue == undefined || viewValue.length == 0) {
+                                ctrl.$setValidity('valid', true)
+                                return viewValue
+                            }
+                            var valid_value = valid_fn(viewValue)
+                            if (typeof valid_value == "boolean") {
+                                ctrl.$setValidity('valid', valid_value);
+                                return viewValue
+                            } else {
+                                ctrl.$setValidity('valid', valid_value !== undefined);
+                                return valid_value;
+                            }
+                        });
+                    }
+                }
+            };
+        });
+
+        app.factory('Data', function() {
+            return {
+                inputSelected: null
+            };
+        });
+
+
+        app.controller('FunctionGenerator',
+            function($scope, WidgetService) {
+                var selectedInput;
+                $scope.inputs = []
+                $scope.fnDict = fnList.list
+                $scope.fnSelected = null
+                $scope.hide = true
+                $scope.widget = WidgetService
+
+
+                $scope.update = function(inputs) {
+                    console.log(inputs)
+                    $scope.fnSelected.callback(inputs, $scope.widget)
+                    $scope.hide = true
+                };
+
+                $scope.reset = function() {
+                    $scope.user = angular.copy($scope.master);
+                };
+
+                $scope.isUnchanged = function(inputs) {
+                    return angular.equals(inputs, $scope.master);
+                };
+
+                $scope.cancel = function() {
+                    $scope.hide = true
+                }
+
+                $scope.changeSelectedFn = function(fn) {
+                    if (fn != undefined && fn.argument != undefined) {
+                        $scope.hide = false
+                        $scope.inputs = angular.copy(fn.argument)
+                        $scope.fnSelected = fn
+                    }
+                }
+                $scope.selectedInput = function(elm) {
+                    selectedInput = elm
+                    $scope.widget.data.fnAfterChange = function(value) {
+                        elm.value = value;
+                        $scope.$apply()
+                        return value
+                    }
+                }
+                $scope.isSelectedInput = function(elm) {
+                    return selectedInput == elm
+                }
+
+
+            }
+
+        );
+
+
+
+        app.directive("smart", function() {
+            return {
+                restrict: 'A',
+                link: function($scope, el, attrs) {
+                    el.bind("change", function(e) {
+                        if ((e.srcElement || e.target).files != null)
+                            $scope.fnSelected.file = (e.srcElement || e.target).files[0];
                     });
                 }
             }
-        };
-    });
+        })
+
+    }
 
 
-    app.controller('FunctionGenerator', ['$scope',
-        function($scope) {
-            $scope.inputs = []
-            $scope.fnDict = fnList.list
-            $scope.fnSelected = null
-            $scope.hide = true
-
-
-            $scope.update = function(inputs) {
-                console.log(inputs)
-                $scope.fnSelected.callback(inputs)
-                $scope.hide = true
-            };
-
-            $scope.reset = function() {
-                $scope.user = angular.copy($scope.master);
-            };
-
-            $scope.isUnchanged = function(inputs) {
-                return angular.equals(inputs, $scope.master);
-            };
-
-            $scope.cancel = function() {
-                $scope.hide = true
-            }
-
-            $scope.changeSelectedFn = function(fn) {
-                console.log(JSON.stringify(fn))
-                if (fn != undefined && fn.argument != undefined) {
-                    $scope.hide = false
-                    $scope.inputs = angular.copy(fn.argument)
-                    $scope.fnSelected = fn
-                }
-            }
-
-        }
-
-    ]);
-
-
-
-    app.directive("smart", function() {
-        return {
-            restrict: 'A',
-            link: function($scope, el, attrs) {
-                el.bind("change", function(e) {
-                    if ((e.srcElement || e.target).files != null)
-                        $scope.fnSelected.file = (e.srcElement || e.target).files[0];
-                });
-            }
-        }
-    })
-
-    angular.bootstrap(document, ['myApp'])
-
+    return {
+        init: init
+    }
 
 
 })
 ;
 define('workspace/workspace',[
     "jquery",
+    "metisMenu",
     "./evaluator",
     "./eqobj",
     "./widget",
     "./fnList",
     "./generator",
     "filereader",
-    "metisMenu",
-], function($, evaluator, eqobj, widget, fnList, generator) {
-
-
+], function($, metisMenu, evaluator, eqobj, widget, fnList, generator) {
 
 
 
@@ -44931,17 +45053,19 @@ define('workspace/workspace',[
 
 
     $(function() {
-
-        initComposent();
-        evaluator.initPollingGetCalcResult();
+        var app = angular.module('myApp', []);
+        initComposent(app);
+        angular.bootstrap(document, ['myApp'])
+        $('#side-menu').metisMenu();
+        //evaluator.initPollingGetCalcResult();
     })
 
 
 
-    function initComposent() {
+    function initComposent(app) {
 
-        $('#side-menu').metisMenu();
-
+        generator.init(app);
+        widget.init(app);
         $("#formulaToggle").click(
             function() {
                 if ($('#formula').is(':visible')) {
@@ -44972,40 +45096,45 @@ define('workspace/workspace',[
 
 
         $("a").dblclick(function() {
+
+            $('#side-menu').metisMenu();
             // insertAtCursor($(this).attr('title'));
         });
 
-        $(".btn_eval").click(
-            function() {
-                evaluator.eqEvaluation();
-            });
+
+        //$(".btn_eval").click(
+        //   function() {
+        //      evaluator.eqEvaluation();
+        // });
+        //$this.find("li").has("ul").children("a").size()
+        //$('#side-menu').metisMenu();
 
     }
 
 
-    /*  function insertAtCursor(text) {
-    var field = document.getElementById("id_equations");
+    function insertAtCursor(text) {
+        var field = document.getElementById("id_equations");
 
-    if (document.selection) {
-      var range = document.selection.createRange();
+        if (document.selection) {
+            var range = document.selection.createRange();
 
-      if (!range || range.parentElement() != field) {
-        field.focus();
-        range = field.createTextRange();
-        range.collapse(false);
-      }
-      range.text = text;
-      range.collapse(false);
-      range.select();
-    } else {
-      field.focus();
-      var val = field.value;
-      var selStart = field.selectionStart;
-      var caretPos = selStart + text.length;
-      field.value = val.slice(0, selStart) + text + val.slice(field.selectionEnd);
-      field.setSelectionRange(caretPos, caretPos);
+            if (!range || range.parentElement() != field) {
+                field.focus();
+                range = field.createTextRange();
+                range.collapse(false);
+            }
+            range.text = text;
+            range.collapse(false);
+            range.select();
+        } else {
+            field.focus();
+            var val = field.value;
+            var selStart = field.selectionStart;
+            var caretPos = selStart + text.length;
+            field.value = val.slice(0, selStart) + text + val.slice(field.selectionEnd);
+            field.setSelectionRange(caretPos, caretPos);
+        }
     }
-  }*/
 
 
 
@@ -45686,7 +45815,7 @@ require([
         'workspace/widget',
         'workspace/workspace',
         'jquery.mockjax',
-        //'workspace/mock',
+       // 'workspace/mock',
         'workspace/mquery',
         'workspace/fnList',
         "workspace/generator",

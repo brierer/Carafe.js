@@ -24,9 +24,9 @@ define([
             afterSelection: function(r, c, r1, c2) {
                 var hook = [r, c, r1, c2]
                 if (r1 < this.countRows() - 2) {
-                    data.fnAfterChange("select(" + table.prettyData + "," + hook + ")")
+                    data.fnAfterChange("select(" + table.prettyData() + "," + hook + ")")
                 } else {
-                    data.fnAfterChange("col(" + table.prettyData + "," + c + ")")
+                    data.fnAfterChange("col(" + table.prettyData() + "," + c + ")")
                 }
             },
             contextMenu: {

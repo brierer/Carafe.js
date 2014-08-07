@@ -116,8 +116,8 @@ define(["./widget"], function(widget) {
                     'title': 'y',
                     'validation': validations.v_float
                 }],
-                'callback': function() {
-                    alert("asdf")
+                'callback': function(fn , widget) {
+                   widget.addToEditorText(defaut_fn("sum", fn))
                 }
             }),
             SubList("Stats", [FunctionCreator({
@@ -130,7 +130,6 @@ define(["./widget"], function(widget) {
                     'validation': validations.v_float
                 }],
                 'callback': function() {
-                    alert("asdf")
                 }
             })])
         ])
@@ -138,12 +137,11 @@ define(["./widget"], function(widget) {
 
 
     function valid_file(value) {
-        console.log("YO")
-        console.log((value.srcElement || value.target).files[0])
         return value
     }
 
     function valid_float(value) {
+        if (value[0]=="=") return value
         var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
         if (FLOAT_REGEXP.test(value)) {
             return parseFloat(value.replace(',', '.'));
@@ -153,6 +151,7 @@ define(["./widget"], function(widget) {
     }
 
     function valid_integer(value) {
+        if (value[0]=="=") return value
         var REGEXP = /^\-?\d+$/;
         return REGEXP.test(value)
     }
@@ -201,6 +200,17 @@ define(["./widget"], function(widget) {
         console.log(JSON.stringify(file))
     }
 
+    function defaut_fn(name,arg){
+        var txt = name + "("
+        arg.forEach(function (e,i){
+            console.log(JSON.stringify(e))
+            txt += e.value
+            if (i!=arg.length-1)
+                txt += ','
+        })    
+        txt += ')'
+        return txt
+    }
 
     function processURL(variable_name, fn , widget) {
 

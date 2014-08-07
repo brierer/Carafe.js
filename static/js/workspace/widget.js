@@ -18,14 +18,24 @@ define([
         function init(app) {
             var editor;
             app.factory("WidgetService", function() {
-               data = {fnAfterChange:function(v){return "widget"}}
+                var data = {
+                    fnAfterChange: function(v) {
+                        return "widget"
+                    }
+                }
+                var message = {
+                    fn: function() {
+                        return ""
+                    }
+                }
+
 
                 function displayData(data) {
-                    console.log(data)
                     if (data != null && data.parse !== undefined) {
                         updateEditorText()
                         if (data.eval.statut == "ok") {
                             displayWidgetFactory(data.parse, data.eval.res);
+                            message.fn("")
                         } else if (data.statut == 'tko') {
                             displayBadEval(data.eval);
                         } else if (data.statut == 'ko') {
@@ -91,7 +101,7 @@ define([
                 function displayOneTable(table) {
                     $("#containment-wrapper").append("<div class='table-container ui-widget-content draggable'><div class='handsontable-wrapper'></div<</div>")
                     $('#containment-wrapper div').last().outerWidth(table.width);
-                    var handsontable = new handsontable_fabric.HDT_fabric(table, updateEditorText, data,$("#containment-wrapper"))
+                    var handsontable = new handsontable_fabric.HDT_fabric(table, updateEditorText, data, $("#containment-wrapper"))
                     var tableAdd = $('#containment-wrapper div.handsontable-wrapper').last()
                     tableAdd.handsontable(handsontable.options);
                 }
@@ -102,6 +112,12 @@ define([
                     editor.save();
                 }
 
+                function addToEditorText(value) {
+                    var preText = editor.getDoc().getValue()
+                    $('#invisible-wrapper').css("visibility", "visible");
+                    if (message.fn != null) message.fn("Please, reload the page with GO!")
+                    editor.getDoc().setValue(preText + value)
+                }
 
                 function setWidget() {
                     setDraggableWidget();
@@ -188,7 +204,11 @@ define([
                     editor = CodeMirror.fromTextArea(document.getElementById("id_equations"), {
                         mode: "haskell",
                         lineNumbers: true,
-                        theme: "elegant"
+                        theme: "elegant",
+                        onKeyEvent: function(editor, event) {
+                            $('#invisible-wrapper').css("visibility", "visible");
+                            if (message.fn != null) message.fn("Please, reload the page with GO!")
+                        }
 
                     });
 
@@ -198,9 +218,11 @@ define([
                 }
                 return {
                     data: data,
+                    message: message,
                     displayData: displayData,
                     addTable: addTable,
                     addTableWithData: addTableWithData,
+                    addToEditorText: addToEditorText,
                     editor: setEditor()
                 }
             });
@@ -209,8 +231,14 @@ define([
             app.controller('WidgetController',
                 function($scope, WidgetService) {
                     $scope.WidgetService = WidgetService
+                    WidgetService.message.fn = function(msg) {
+                        $scope.message = msg
+                        $scope.$apply()
+                    }
                     $scope.update = function() {
+                        $scope.WidgetService.editor.save()
                         evaluator.eqEvaluation($scope.updateData)
+
                     }
 
                     $scope.updateData = function(data) {
@@ -218,7 +246,6 @@ define([
                         $scope.WidgetService.displayData(data)
                     }
 
-                  
                     evaluator.initPollingGetCalcResult($scope.updateData)
 
                 }

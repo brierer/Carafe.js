@@ -1,4 +1,4 @@
-define(["./eqobj"], function(eqobj, widget) {
+define(["./eqobj"], function(eqobj) {
 
     var isCalculatingWaiting = false;
 
@@ -8,8 +8,6 @@ define(["./eqobj"], function(eqobj, widget) {
     function eqEvaluation(fn) {
         $('#invisible-wrapper').css("visibility", "visible");
         startTime = new Date().getTime();
-        console.log(widget)
-        widget.editor.save();
         var formData = $("form").serialize();
         isCalculatingWaiting = true;
         $.post('postCalcResult', formData, function() {
@@ -32,9 +30,9 @@ define(["./eqobj"], function(eqobj, widget) {
                 var now = new Date().getTime();
                 var timesRun = nbTry;
                 console.log('Action ' + (timesRun + 1) + ' started ' + (now - startTime) + 'ms after script start');
-                if (r.data != null) {
-                    eqobj.eqWrapper.setEQ(r.data.parse)
-                    fn(r.data);
+                if (r != null) {
+                    eqobj.eqWrapper.setEQ(r.parse)
+                    fn(r);
                     isCalculatingWaiting = false;
                 } else {
                     setTimeout(function() {
