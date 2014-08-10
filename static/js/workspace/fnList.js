@@ -121,15 +121,13 @@ define(["./widget"], function(widget) {
                 }
             }),
             SubList("Stats", [FunctionCreator({
-                'title': 'sum',
+                'title': 'descriptive',
                 'argument': [{
-                    'title': 'x',
-                    'validation': validations.v_float
-                }, {
-                    'title': 'y',
-                    'validation': validations.v_float
-                }],
-                'callback': function() {
+                    'title': 'data',
+                    'validation': null
+                },],
+                'callback': function(fn , widget) {
+                    widget.addToEditorText(defaut_fn("descriptive", fn))
                 }
             })])
         ])

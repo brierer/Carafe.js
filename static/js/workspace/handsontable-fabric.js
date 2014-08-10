@@ -23,7 +23,7 @@ define([
             afterCreateCol: afterCreateCol,
             afterSelection: function(r, c, r1, c2) {
                 var hook = [r, c, r1, c2]
-                if (r1 < this.countRows() - 2) {
+                if (r1 < this.countRows() - 2 || r!=0) {
                     data.fnAfterChange("select(" + table.prettyData() + "," + hook + ")")
                 } else {
                     data.fnAfterChange("col(" + table.prettyData() + "," + c + ")")
@@ -55,19 +55,10 @@ define([
                 }
             },
             afterGetColHeader: function(col, TH) {
-                var instance = this;
-
-                var $button = $(buildButton(col));
-                $button.click(function(event) {
-                    var num = Number($button.attr("nb"))
-                    instance.selectCell(0, num, instance.countRows() - 2, num, true)
-                   // container.find("input:not(:eq(" + col + "))").attr('checked', false)
+                var instance = this
+                $(TH.firstChild).click(function(event) {
+                    instance.selectCell(0, col, instance.countRows() - 2, col, true)
                 });
-
-
-                TH.firstChild.appendChild($button[0]);
-
-                //TH.appendChild(menu[0]);
             },
         }
 

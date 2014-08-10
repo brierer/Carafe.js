@@ -116,7 +116,7 @@ define([
                     var preText = editor.getDoc().getValue()
                     $('#invisible-wrapper').css("visibility", "visible");
                     if (message.fn != null) message.fn("Please, reload the page with GO!")
-                    editor.getDoc().setValue(preText + value)
+                    editor.getDoc().setValue(preText + "\n" + value)
                 }
 
                 function setWidget() {
@@ -175,13 +175,11 @@ define([
                 function addTable(name, nbcol) {
                     var nbCol = parseInt(nbcol)
                     var arr = new Array(nbCol);
-
                     for (var a = []; a.length < 1; a.push(arr.slice(0)));
-
-
-                    var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
-
+                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "data", []), eqobj.createObject([])])
                     var eqs = eqobj.addEq(name, f)
+                    
+                    eqobj.addEq(name + "data", eqobj.createMatrix(nbCol, 0));
                     eqobj.addShow(name)
                     displayOneTable(table.Table.fromArray(eqs, a, null))
                     setWidget();
@@ -190,9 +188,17 @@ define([
                 function addTableWithData(name, data, header) {
                     var a = data
                     var nbCol = data[0].length
-                    var f = eqobj.createFunction("table", [eqobj.createMatrix(nbCol, 0), eqobj.createObject()])
-
+                    var colName = []
+                    if (header != null) {
+                        for (var i = 0; a < header; a++) {
+                            colName.push(eqobj.createString(header[i]))
+                        }
+                    }
+                    var col = eqobj.createObject([])
+                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "data", []), col])
                     var eqs = eqobj.addEq(name, f)
+
+                    eqobj.addEq(name + "data", eqobj.createMatrix(nbCol, 0));
                     eqobj.addShow(name)
                     displayOneTable(table.Table.fromArray(eqs, a, null, header))
                     setWidget();
@@ -233,12 +239,11 @@ define([
                     $scope.WidgetService = WidgetService
                     WidgetService.message.fn = function(msg) {
                         $scope.message = msg
-                        $scope.$apply()
                     }
                     $scope.update = function() {
                         $scope.WidgetService.editor.save()
+                        $scope.message = ""
                         evaluator.eqEvaluation($scope.updateData)
-
                     }
 
                     $scope.updateData = function(data) {

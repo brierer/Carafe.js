@@ -256,7 +256,7 @@ define(["./mquery"], function(mquery) {
             var valueToChange = M(findEQ(val.f.name).v);
             changeVariable(value, valueToChange);
         } else {
-            changeAtomicValue(value, exp.val())
+            changeAtomic(value, exp.val())
         }
     }
 
@@ -328,10 +328,7 @@ define(["./mquery"], function(mquery) {
             var valueToChange = M(findEQ(val.f.name).v);
             removeCol(col, valueToChange);
         } else {
-            console.log(col)
-            console.log(JSON.stringify(val))
             val.v.a.splice(col, 1);
-            console.log(JSON.stringify(val))
         }
     }
 
@@ -375,7 +372,7 @@ define(["./mquery"], function(mquery) {
     }
 
     function addCol(exp, col) {
-        exp.val().v.a.splice(col, 0, createArray());
+        exp.val().v.a.splice(col, 0, createArray([]));
     }
 
     function addAtomicValue(hook, subeqObj) {
@@ -417,7 +414,6 @@ define(["./mquery"], function(mquery) {
         eqs = eqWrapper.getEQ();
         eqs[eqs.length - 1][1].s2 = "\n";
         eqs.push([name, value])
-        console.log(value)
         return value
     }
 
@@ -452,7 +448,7 @@ define(["./mquery"], function(mquery) {
     function createMatrix(col, row) {
         var arr = []
         for (var i = 0; i < col; i++) {
-            arr.push(createArray(row));
+            arr.push(createArray([]));
         }
         var v = {
             a: arr
@@ -464,8 +460,8 @@ define(["./mquery"], function(mquery) {
         }
     }
 
-    function createArray(nb) {
-        var arr = []
+    function createArray(val) {
+        var arr = val
         var v = {
             a: arr
         }
@@ -476,11 +472,11 @@ define(["./mquery"], function(mquery) {
         }
     }
 
-    function createObject() {
+    function createObject(attr) {
         return {
             s1: "",
             v: {
-                o: []
+                o: attr
             },
             s2: ""
         }
@@ -490,6 +486,7 @@ define(["./mquery"], function(mquery) {
         eqWrapper.getEQ()[0][1].v.f.arg[0].v.a.push(createFunction(eq, []));
     }
 
+    
     return {
         eqWrapper: eqWrapper,
         addOrChangeValue: addOrChangeValue,
