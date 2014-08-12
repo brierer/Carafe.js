@@ -31,8 +31,8 @@ define(["./eqobj"], function(eqobj) {
                 var timesRun = nbTry;
                 console.log('Action ' + (timesRun + 1) + ' started ' + (now - startTime) + 'ms after script start');
                 if (r != null) {
-                    eqobj.eqWrapper.setEQ(r.parse)
-                    fn(r);
+                    eqobj.eqWrapper.setEQ(r.data.parse)
+                    fn(r.data);
                     isCalculatingWaiting = false;
                 } else {
                     setTimeout(function() {

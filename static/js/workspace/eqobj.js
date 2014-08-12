@@ -39,11 +39,11 @@ define(["./mquery"], function(mquery) {
             var s1, v, s2 = ""
             s1 = subTree.s1
             s2 = subTree.s2
-            var value = subTree.v
-            if (value.a !== undefined) {
-                v = stringifyArray(value.a)
-            } else if (value.f !== undefined) {
-                v = stringifyFunction(value.f)
+            var value = subTree[getValue()]
+            if (value[getArray()] !== undefined) {
+                v = stringifyArray(value[getArray()])
+            } else if (value[getF()] !== undefined) {
+                v = stringifyFunction(value[getF()])
             } else if (value.o !== undefined) {
                 v = stringifyObj(value.o)
             } else {
@@ -67,11 +67,11 @@ define(["./mquery"], function(mquery) {
 
         function stringifyFunction(f) {
 
-            if (f.arg.length == 0) {
+            if (f[getArg()].length == 0) {
                 return f.name;
             } else {
                 var text = f.name + "("
-                var values = f.arg
+                var values = f[getArg()]
                 values.forEach(function(val, i) {
                     if (i != 0) {
                         text += ','
@@ -96,7 +96,7 @@ define(["./mquery"], function(mquery) {
         }
 
         function stringifyAtomicValue(tag, contents) {
-            if (tag == "Pstring") {
+            if (tag == getString()) {
                 return "\"" + contents + "\""
             } else {
                 return contents
@@ -105,6 +105,31 @@ define(["./mquery"], function(mquery) {
 
     };
 
+    function getArg(){
+        return "arg"
+    }
+
+    function getValue(){
+        return "v"
+    }
+
+    function getArray(){
+        return "a"
+    }
+    function getF(){
+        return "f"
+    }
+    function getString(){
+        return "Pstring"
+    }
+
+    function getBool(){
+        return "Pbool"
+    }
+
+    function getNum(){
+        return "Pnum"
+    }
     //search
     function findEQ(name) {
         var eq = eqWrapper.getEQ();
@@ -145,7 +170,7 @@ define(["./mquery"], function(mquery) {
 
     function getDisplayItem_(eqObj, id) {
         var m = new mquery.M(eqObj[0][1])
-        m.getFunction("show", 0).fwd(["v", "a"]).select(id)
+        m.getFunction("show", 0).fwd([getValue(), getArray()]).select(id)
         return m
     }
 
@@ -161,7 +186,7 @@ define(["./mquery"], function(mquery) {
     function getElemOfArray(i) {
         return function(eqObj) {
             var m = new mquery.M(eqObj)
-            m.fwd(['v', 'a']).select(i)
+            m.fwd([getValue(), getArray()]).select(i)
             return m.val()
         }
     }
@@ -170,7 +195,7 @@ define(["./mquery"], function(mquery) {
 
     function isArray(eqObj) {
         var m = new mquery.M(eqObj)
-        m.fwd(['v', 'a'])
+        m.fwd([getValue(), getArray()])
         return m.val()
     }
 
@@ -178,9 +203,9 @@ define(["./mquery"], function(mquery) {
     function isVariable(eqObj) {
         var m = new mquery.M(eqObj)
         var b = new mquery.M(eqObj)
-        m.fwd(['v', 'f', 'arg']).compare('length', 0)
+        m.fwd([getValue(), getF(), getArg()]).compare('length', 0)
         if (!m.maybe().isNothing()) {
-            return b.fwd(['v', 'f']).val()
+            return b.fwd([getValue(), getF()]).val()
         }
         return m.val()
     }
@@ -224,17 +249,17 @@ define(["./mquery"], function(mquery) {
 
     function addOrChangeAtomicValue(hook, subeqObj, eqObj) {
         if (isVariable(subeqObj)) {
-            addOrChangeAtomicValue(hook, findEQ(subeqObj.v.f.name));
+            addOrChangeAtomicValue(hook, findEQ(subeqObj[getValue()][getF()].name));
         } else {
             if (false) {
                 addAtomicValue(hook, subeqObj)
             } else {
                 if (subeqObj[hook.row] != undefined) {
                     if (isVariable(subeqObj[hook.row])) {
-                        var valueToChange = M(findEQ(subeqObj[hook.row].v.f.name).v);
+                        var valueToChange = M(findEQ(subeqObj[hook.row][getValue()][getF()].name)[getValue()]);
                         changeVariable(hook.new, valueToChange);
                     } else {
-                        var valueToChange = subeqObj[hook.row].v
+                        var valueToChange = subeqObj[hook.row][getValue()]
                         changeAtomic(hook.new, valueToChange)
                     }
                 } else {
@@ -252,8 +277,8 @@ define(["./mquery"], function(mquery) {
 
     function changeVariable(value, exp) {
         val = exp.val()
-        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-            var valueToChange = M(findEQ(val.f.name).v);
+        if (!(exp.fwd([getF(), getArg()]).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val[getF()].name)[getValue()]);
             changeVariable(value, valueToChange);
         } else {
             changeAtomic(value, exp.val())
@@ -274,7 +299,7 @@ define(["./mquery"], function(mquery) {
     }
 
     function changePbool(value, subeqObj) {
-        subeqObj.tag = 'Pbool'
+        subeqObj.tag = getBool()
         if (value == "false")
             subeqObj.contents = false
         else {
@@ -283,12 +308,12 @@ define(["./mquery"], function(mquery) {
     }
 
     function changePstring(value, subeqObj) {
-        subeqObj.tag = 'Pstring'
+        subeqObj.tag = getString()
         subeqObj.contents = value
     }
 
     function changePnum(value, subeqObj) {
-        subeqObj.tag = 'Pnum'
+        subeqObj.tag = getNum()
         subeqObj.contents = Number(value)
     }
 
@@ -301,7 +326,7 @@ define(["./mquery"], function(mquery) {
         if (!data.isNothing()) {
             data.val().forEach(function(val, i) {
                 valueToDelete = new M(val);
-                if (!valueToDelete.fwd(['v']).isNothing()) {
+                if (!valueToDelete.fwd([getValue()]).isNothing()) {
                     removeFromVariable(row, valueToDelete);
 
                 }
@@ -313,22 +338,22 @@ define(["./mquery"], function(mquery) {
     function removeFromVariable(row, exp) {
         var val = exp.val()
 
-        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-            var valueToChange = M(findEQ(val.f.name).v);
+        if (!(exp.fwd([getF(), getArg()]).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val[getF()].name)[getValue()]);
             removeFromVariable(row, valueToChange);
         } else {
-            val.a.splice(row - 1, 1);
+            val[getArray()].splice(row - 1, 1);
         }
     }
 
     function removeCol(col, exp) {
         var val = exp.val()
 
-        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-            var valueToChange = M(findEQ(val.f.name).v);
+        if (!(exp.fwd([getF(), getArg()]).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val[getF()].name)[getValue()]);
             removeCol(col, valueToChange);
         } else {
-            val.v.a.splice(col, 1);
+            val[getValue()][getArray()].splice(col, 1);
         }
     }
 
@@ -338,11 +363,11 @@ define(["./mquery"], function(mquery) {
     function addVariable(row, exp, variable) {
         var val = exp.val()
 
-        if (!(exp.fwd(['f', 'arg']).compare('length', 0).isNothing())) {
-            var valueToChange = M(findEQ(val.f.name).v);
+        if (!(exp.fwd([getF(), getArg()]).compare('length', 0).isNothing())) {
+            var valueToChange = M(findEQ(val[getF()].name)[getValue()]);
             removeFromVariable(row, valueToChange);
         } else {
-            val.a.splice(row, 0, variable);
+            val[getArray()].splice(row, 0, variable);
         }
     }
 
@@ -358,12 +383,12 @@ define(["./mquery"], function(mquery) {
             valueToDelete = new M(val);
             if (!valueToDelete.isNothing()) {
                 back = new M(val)
-                if (valueToDelete.fwd(["v", "f", "arg"]).compare("length", 0)) {
-                    var valueToChange = M(findEQ(back.fwd(['v', 'f', 'name']).val()).v);
+                if (valueToDelete.fwd([getValue(), getF(), getArg()]).compare("length", 0)) {
+                    var valueToChange = M(findEQ(back.fwd([getValue(), getF(), 'name']).val())[getValue()]);
                     //valueToChange.log()
                     addVariable(row, valueToChange, createEmptyVal());
                 } else {
-                    val.v.a.splice(row, 0, createEmptyVal());
+                    val[getValue()][getArray()].splice(row, 0, createEmptyVal());
                 }
             }
         })
@@ -372,7 +397,7 @@ define(["./mquery"], function(mquery) {
     }
 
     function addCol(exp, col) {
-        exp.val().v.a.splice(col, 0, createArray([]));
+        exp.val()[getValue()][getArray()].splice(col, 0, createArray([]));
     }
 
     function addAtomicValue(hook, subeqObj) {
@@ -402,8 +427,8 @@ define(["./mquery"], function(mquery) {
 
     function createVal(hook, subeqObj, fn) {
         var value = {}
-        value.v = {};
-        fn(hook, value.v)
+        value[getValue()] = {};
+        fn(hook, value[getValue()])
         value.s1 = ""
         value.s2 = ""
         return value
@@ -419,7 +444,7 @@ define(["./mquery"], function(mquery) {
 
     function createString(val) {
         var value = {}
-        value.v = {
+        value[getValue()] = {
             tag: "Pstring",
             contents: val
         };
@@ -483,7 +508,7 @@ define(["./mquery"], function(mquery) {
     }
 
     function addShow(eq) {
-        eqWrapper.getEQ()[0][1].v.f.arg[0].v.a.push(createFunction(eq, []));
+        eqWrapper.getEQ()[0][1][getValue()][getF()][getArg()][0][getValue()][getArray()].push(createFunction(eq, []));
     }
 
     

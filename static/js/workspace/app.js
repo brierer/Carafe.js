@@ -68,7 +68,7 @@ require([
         'workspace/widget',
         'workspace/workspace',
         'jquery.mockjax',
-       // 'workspace/mock',
+        'workspace/mock',
         'workspace/mquery',
         'workspace/fnList',
         "workspace/generator",

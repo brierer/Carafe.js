@@ -1,6 +1,8 @@
 define(["./widget"], function(widget) {
 
 
+
+
     var validations = {
         v_integer: {
             fn: valid_integer,
@@ -9,6 +11,10 @@ define(["./widget"], function(widget) {
         v_float: {
             fn: valid_float,
             msg: "This is not a valid float!"
+        },
+        v_char: {
+            fn: valid_char,
+            msg: "This is not a valid char!"
         },
         v_file: {
             fn: valid_file,
@@ -37,6 +43,16 @@ define(["./widget"], function(widget) {
 
     }
 
+    Argument = function(title, type, validation, value) {
+        if (!(this instanceof Argument)) {
+            return new Argument(title, type, validation, value);
+        }
+        this.title = title
+        this.type = type
+        this.validation = validation
+        this.value = value
+    }
+
     SubList = function(title, fns) {
         if (!(this instanceof SubList)) {
             return new SubList(title, fns);
@@ -52,10 +68,7 @@ define(["./widget"], function(widget) {
                 'title': 'New Table',
                 'icon': 'fa-table',
                 'argument': {
-                    nbcol: {
-                        'title': 'Nb Col',
-                        'validation': validations.v_integer
-                    }
+                    nbcol: Argument('Nb col', null, validations.v_integer),
                 },
                 'callback': function(fn, widget) {
                     widget.addTable(this.variable_name, fn.nbcol.value)
@@ -65,16 +78,9 @@ define(["./widget"], function(widget) {
                 'title': 'Table from CSV FILE',
                 'icon': 'fa-table',
                 'argument': {
-                    file: {
-                        'title': 'File',
-                        'type': 'file',
-                        'validation': validations.v_file
-                    },
-                    header: {
-                        'title': 'First Row Header',
-                        'type': 'checkbox',
-                        'validation': null
-                    }
+                    file: Argument('File', 'file', validations.v_file),
+                    header: Argument('First Row Header', 'checkbox', null),
+                    separator: Argument('separator', null, validations.v_char, ","),
                 },
                 'callback': function(fn, widget) {
                     var reader = new FileReader()
@@ -92,41 +98,32 @@ define(["./widget"], function(widget) {
                 'title': 'Table from CSV URL',
                 'icon': 'fa-table',
                 'argument': {
-                    url: {
-                        'title': 'URL',
-                        'validation': validations.v_url
-                    },
-                    header: {
-                        'title': 'First Row Header',
-                        'type': 'checkbox',
-                        'validation': null
-                    }
+                    url: Argument('url', null, validations.v_url),
+                    header: Argument('First Row Header', 'checkbox', null),
+                    separator: Argument('separator', null, validations.v_char, ",")
                 },
-                'callback': function(fn ,widget) {
-                    processURL(this.variable_name, fn , widget)
+                'callback': function(fn, widget) {
+                    processURL(this.variable_name, fn, widget)
                 }
             })
         ]),
-        SubList("Math", [FunctionCreator({
+        SubList("Math", [
+            FunctionCreator({
                 'title': 'sum',
-                'argument': [{
-                    'title': 'x',
-                    'validation': validations.v_float
-                }, {
-                    'title': 'y',
-                    'validation': validations.v_float
-                }],
-                'callback': function(fn , widget) {
-                   widget.addToEditorText(defaut_fn("sum", fn))
+                'argument': [
+                    Argument('x', null, validations.v_float),
+                    Argument('y', null, validations.v_file)
+                ],
+                'callback': function(fn, widget) {
+                    widget.addToEditorText(defaut_fn("sum", fn))
                 }
             }),
             SubList("Stats", [FunctionCreator({
                 'title': 'descriptive',
-                'argument': [{
-                    'title': 'data',
-                    'validation': null
-                },],
-                'callback': function(fn , widget) {
+                'argument': [
+                    Argument('data', null, null),
+                ],
+                'callback': function(fn, widget) {
                     widget.addToEditorText(defaut_fn("descriptive", fn))
                 }
             })])
@@ -139,7 +136,7 @@ define(["./widget"], function(widget) {
     }
 
     function valid_float(value) {
-        if (value[0]=="=") return value
+        if (value[0] == "=") return value
         var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
         if (FLOAT_REGEXP.test(value)) {
             return parseFloat(value.replace(',', '.'));
@@ -148,8 +145,16 @@ define(["./widget"], function(widget) {
         }
     }
 
+    function valid_char(value) {
+        if (value.length==1) {
+            return value
+        } else {
+            return undefined;
+        }
+    }
+
     function valid_integer(value) {
-        if (value[0]=="=") return value
+        if (value[0] == "=") return value
         var REGEXP = /^\-?\d+$/;
         return REGEXP.test(value)
     }
@@ -198,19 +203,19 @@ define(["./widget"], function(widget) {
         console.log(JSON.stringify(file))
     }
 
-    function defaut_fn(name,arg){
+    function defaut_fn(name, arg) {
         var txt = name + "("
-        arg.forEach(function (e,i){
+        arg.forEach(function(e, i) {
             console.log(JSON.stringify(e))
             txt += e.value
-            if (i!=arg.length-1)
+            if (i != arg.length - 1)
                 txt += ','
-        })    
+        })
         txt += ')'
         return txt
     }
 
-    function processURL(variable_name, fn , widget) {
+    function processURL(variable_name, fn, widget) {
 
         // Create the XHR object.
         function createCORSRequest(method, url) {
