@@ -71,9 +71,7 @@ define(["./widget"], function(widget) {
                     nbcol: Argument('Nb col', null, validations.v_integer),
                 },
                 'callback': function() {
-                    alert(this.inputs.nbcol.value)
-                    alert(this.fnSelected.variable_name)
-                    widget.addTable(this.fnSelected.variable_name, this.inputs.nbcol.value)
+                    this.widget.addTable(this.fnSelected.variable_name, this.inputs.nbcol.value)
                 }
             }),
             FunctionCreator({
@@ -87,12 +85,13 @@ define(["./widget"], function(widget) {
                 'callback': function() {
                     var reader = new FileReader()
                     var variable_name = this.fnSelected.variable_name
+                    var widget = this.widget
+                    var inputs = this.inputs
                     reader.onload = function(e) {
                         var text = reader.result;
-                        console.log(this.inputs.header.value)
-                        this.widget.addTableWithData(variable_name, processData(text), this.inputs.header.value)
+                        widget.addTableWithData(variable_name, processData(text), inputs.header.value)
                     }
-                    reader.readAsBinaryString(this.file)
+                    reader.readAsBinaryString(this.fnSelected.file)
 
                 }
             }),
