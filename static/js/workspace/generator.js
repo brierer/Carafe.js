@@ -49,8 +49,7 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
 
 
                 $scope.update = function(inputs) {
-                    console.log(inputs)
-                    $scope.fnSelected.callback(inputs, $scope.widget)
+                    $scope.fnSelected.callback.call($scope)
                     $scope.hide = true
                 };
 

@@ -70,8 +70,10 @@ define(["./widget"], function(widget) {
                 'argument': {
                     nbcol: Argument('Nb col', null, validations.v_integer),
                 },
-                'callback': function(fn, widget) {
-                    widget.addTable(this.variable_name, fn.nbcol.value)
+                'callback': function() {
+                    alert(this.inputs.nbcol.value)
+                    alert(this.fnSelected.variable_name)
+                    widget.addTable(this.fnSelected.variable_name, this.inputs.nbcol.value)
                 }
             }),
             FunctionCreator({
@@ -82,13 +84,13 @@ define(["./widget"], function(widget) {
                     header: Argument('First Row Header', 'checkbox', null),
                     separator: Argument('separator', null, validations.v_char, ","),
                 },
-                'callback': function(fn, widget) {
+                'callback': function() {
                     var reader = new FileReader()
-                    var variable_name = this.variable_name
+                    var variable_name = this.fnSelected.variable_name
                     reader.onload = function(e) {
                         var text = reader.result;
-                        console.log(fn.header.value)
-                        widget.addTableWithData(variable_name, processData(text), fn.header.value)
+                        console.log(this.inputs.header.value)
+                        this.widget.addTableWithData(variable_name, processData(text), this.inputs.header.value)
                     }
                     reader.readAsBinaryString(this.file)
 
@@ -102,8 +104,8 @@ define(["./widget"], function(widget) {
                     header: Argument('First Row Header', 'checkbox', null),
                     separator: Argument('separator', null, validations.v_char, ",")
                 },
-                'callback': function(fn, widget) {
-                    processURL(this.variable_name, fn, widget)
+                'callback': function() {
+                    processURL(this.fnSelected.variable_name, this.inputs, this.widget)
                 }
             })
         ]),
@@ -114,8 +116,8 @@ define(["./widget"], function(widget) {
                     Argument('x', null, validations.v_float),
                     Argument('y', null, validations.v_file)
                 ],
-                'callback': function(fn, widget) {
-                    widget.addToEditorText(defaut_fn("sum", fn))
+                'callback': function() {
+                    this.widget.addToEditorText(defaut_fn("sum", this.inputs))
                 }
             }),
             SubList("Stats", [FunctionCreator({
@@ -123,8 +125,8 @@ define(["./widget"], function(widget) {
                 'argument': [
                     Argument('data', null, null),
                 ],
-                'callback': function(fn, widget) {
-                    widget.addToEditorText(defaut_fn("descriptive", fn))
+                'callback': function() {
+                    this.widget.addToEditorText(defaut_fn("descriptive", this.inputs))
                 }
             })])
         ])
