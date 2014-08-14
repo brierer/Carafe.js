@@ -71,6 +71,10 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
                         $scope.inputs = angular.copy(fn.argument)
                         $scope.fnSelected = fn
                     }
+                    angular.element(document).ready(function() {
+                        $('.icp-auto').iconpicker();
+                    });
+
                 }
                 $scope.selectedInput = function(elm) {
                     selectedInput = elm
@@ -80,6 +84,9 @@ define(["jquery", "validator", "./fnList"], function($, validator, fnList) {
                         return value
                     }
                 }
+
+
+
                 $scope.isSelectedInput = function(elm) {
                     return selectedInput == elm
                 }

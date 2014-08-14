@@ -104,6 +104,10 @@ define([
                     var handsontable = new handsontable_fabric.HDT_fabric(table, updateEditorText, data, $("#containment-wrapper"))
                     var tableAdd = $('#containment-wrapper div.handsontable-wrapper').last()
                     tableAdd.handsontable(handsontable.options);
+                    if (table.param.grid === 0)
+                        tableAdd.find("td").css("border-width", "0")
+                    if (table.param.align === "center")
+                        tableAdd.find("td").addClass("text-center")
                 }
 
 
@@ -112,11 +116,19 @@ define([
                     editor.save();
                 }
 
-                function addToEditorText(value) {
+                function addToEditorText(name, value, toshow) {
+                    if (toshow) {
+                        eqobj.addShow(name)
+                        updateEditorText()
+                    }
                     var preText = editor.getDoc().getValue()
                     $('#invisible-wrapper').css("visibility", "visible");
                     if (message.fn != null) message.fn("Please, reload the page with GO!")
-                    editor.getDoc().setValue(preText + "\n" + value)
+                    if (name != null && name.length > 0) {
+                        editor.getDoc().setValue(preText + "\n" + name + " = " + value)
+                    } else {
+                        editor.getDoc().setValue(preText + "\n" + value)
+                    }
                 }
 
                 function setWidget() {
@@ -178,7 +190,7 @@ define([
                     for (var a = []; a.length < 1; a.push(arr.slice(0)));
                     var f = eqobj.createFunction("table", [eqobj.createFunction(name + "data", []), eqobj.createObject([])])
                     var eqs = eqobj.addEq(name, f)
-                    
+
                     eqobj.addEq(name + "data", eqobj.createMatrix(nbCol, 0));
                     eqobj.addShow(name)
                     displayOneTable(table.Table.fromArray(eqs, a, null))
@@ -189,16 +201,21 @@ define([
                     var a = data
                     var nbCol = data[0].length
                     var colName = []
-                    if (header != null) {
-                        for (var i = 0; a < header; a++) {
-                            colName.push(eqobj.createString(header[i]))
+                    console.log(header)
+                    if (header) {
+                        console.log(data[0].length)
+                        for (var i = 0; i < data[0].length; i++) {
+                            colName.push(eqobj.createString(data[0][i]))
                         }
                     }
-                    var col = eqobj.createObject([])
-                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "data", []), col])
+                    console.log(colName.length)
+                    var col = eqobj.createObject([
+                        ['col', eqobj.createArray(colName)]
+                    ])
+                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "Data", []), col])
                     var eqs = eqobj.addEq(name, f)
 
-                    eqobj.addEq(name + "data", eqobj.createMatrix(nbCol, 0));
+                    eqobj.addEq(name + "Data", eqobj.createMatrix(nbCol, 0));
                     eqobj.addShow(name)
                     displayOneTable(table.Table.fromArray(eqs, a, null, header))
                     setWidget();
@@ -237,13 +254,21 @@ define([
             app.controller('WidgetController',
                 function($scope, WidgetService) {
                     $scope.WidgetService = WidgetService
+                    $scope.btnTxt = "GO!"
                     WidgetService.message.fn = function(msg) {
                         $scope.message = msg
                     }
                     $scope.update = function() {
+                        
                         $scope.WidgetService.editor.save()
                         $scope.message = ""
-                        evaluator.eqEvaluation($scope.updateData)
+                        $scope.btnTxt = "..."
+                        angular.element(document).ready(function() {
+                            while ($scope.updateData==null){console.log("null")}
+                                console.log($scope.updateData)
+                            evaluator.eqEvaluation($scope.updateData)
+                        })
+                        $scope.btnTxt = "GO!"
                     }
 
                     $scope.updateData = function(data) {

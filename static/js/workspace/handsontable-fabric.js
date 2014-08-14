@@ -7,10 +7,21 @@ define([
     }
 
     function HDT_fabric(table, updateEditorText, data, container) {
+        var safeHtmlRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+            var escaped = Handsontable.helper.stringify(value);
+            //escaped = strip_tags(escaped, '<em><b><strong><a><big>'); //be sure you only allow certain HTML tags to avoid XSS threats (you should also remove unwanted HTML attributes)
+            td.innerHTML = escaped;
+            if(cellProperties.readOnly)
+            $(td).css("color","#555")
+            return td;
+        };
 
         this.options = {
             data: table.data,
-            colHeaders: table.param.col == null ? true : table.param.col,
+            columns: makeArrayOf({
+                renderer: safeHtmlRenderer
+            }, table.data[0].length), //Array.apply(null, new Array(table.param.col.length)).map(Object.prototype.valueOf,{renderer:safeHtmlRenderer}),
+            colHeaders: (table.param.header===0) ? false : (table.param.col == null)? true : table.param.col,
             minSpareRows: 1,
             stretchH: 'all',
             width: Math.min(75 * table.data[0].length - 1, 750),
@@ -23,7 +34,7 @@ define([
             afterCreateCol: afterCreateCol,
             afterSelection: function(r, c, r1, c2) {
                 var hook = [r, c, r1, c2]
-                if (r1 < this.countRows() - 2 || r!=0) {
+                if (r1 < this.countRows() - 2 || r != 0) {
                     data.fnAfterChange("select(" + table.prettyData() + "," + hook + ")")
                 } else {
                     data.fnAfterChange("col(" + table.prettyData() + "," + c + ")")
@@ -162,7 +173,22 @@ define([
             return check
         }
 
+        function makeArrayOf(value, length) {
+            var arr = [],
+                i = length;
+            while (i--) {
+                arr[i] = value;
+            }
+            return arr;
+        }
 
+
+        var safeHtmlRenderer = function(instance, td, row, col, prop, value, cellProperties) {
+            var escaped = Handsontable.helper.stringify(value);
+            //escaped = strip_tags(escaped, '<em><b><strong><a><big>'); //be sure you only allow certain HTML tags to avoid XSS threats (you should also remove unwanted HTML attributes)
+            td.innerHTML = escaped;
+            return td;
+        };
 
         function setEmptyStringNull(table) {
             var cells = table.getDataAtRow(table.countRows() - 1);

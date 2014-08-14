@@ -17,7 +17,7 @@ requirejs.config({
         'rickshaw': {
             deps: ['vendor/d3.layout.min', "bootstrap"],
         },
-         'filereader': {
+        'filereader': {
             deps: ['jquery'],
         },
         'bootstrap': {
@@ -35,6 +35,12 @@ requirejs.config({
         'jquery.handsontable.full': {
             deps: ['jquery']
         },
+        'bootstrap-iconpicker': {
+            deps: ['bootstrap','position-icon']
+        },
+        'hotkey': {
+            deps: ['angular']
+        }
     },
 
     paths: {
@@ -50,6 +56,7 @@ require([
         'jquery',
         'jquery-ui',
         'bootstrap',
+        'hotkey',
         'codemirror',
         'filereader',
         'jquery.handsontable.full',
@@ -68,7 +75,7 @@ require([
         'workspace/widget',
         'workspace/workspace',
         'jquery.mockjax',
-        'workspace/mock',
+        //'workspace/mock',
         'workspace/mquery',
         'workspace/fnList',
         "workspace/generator",
@@ -76,6 +83,6 @@ require([
     ],
     function() {
 
-    
+
 
     });

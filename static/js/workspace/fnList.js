@@ -1,5 +1,40 @@
-define(["./widget"], function(widget) {
+define(["./widget", "bootstrap-iconpicker"], function(widget, iconpicker) {
 
+    Variable = function(name) {
+        if (!(this instanceof Variable)) {
+            return new Variable(name);
+        }
+        this.txt = name
+    }
+
+    Default_fn = function(name, arg) {
+        if (!(this instanceof Default_fn)) {
+            return new Default_fn(name, arg);
+        }
+        var txt = ""
+        if (name != null)
+            txt = name
+        if (arg != null) {
+            if (name != null)
+                txt += "("
+            else
+                txt += "["
+            arg.forEach(function(e, i) {
+                if (e.txt != null) {
+                    txt += e.txt
+                } else {
+                    txt += JSON.stringify(e)
+                }
+                if (i != arg.length - 1)
+                    txt += ','
+            })
+            if (name != null)
+                txt += ")"
+            else
+                txt += "]"
+        }
+        this.txt = txt
+    }
 
 
 
@@ -43,27 +78,28 @@ define(["./widget"], function(widget) {
 
     }
 
-    Argument = function(title, type, validation, value) {
+    Argument = function(title, type, validation, value, param) {
         if (!(this instanceof Argument)) {
-            return new Argument(title, type, validation, value);
+            return new Argument(title, type, validation, value, param);
         }
         this.title = title
         this.type = type
         this.validation = validation
         this.value = value
+        this.param = (param == null) ? {} : param
     }
 
-    SubList = function(title, fns) {
+    SubList = function(title, icon, fns) {
         if (!(this instanceof SubList)) {
-            return new SubList(title, fns);
+            return new SubList(title, icon, fns);
         }
         this.title = title
         this.fns = fns
-        this.icon = "fa-sitemap"
+        this.icon = icon
     }
 
     var list = [
-        SubList("Table", [
+        SubList("Table", "fa-table", [
             FunctionCreator({
                 'title': 'New Table',
                 'icon': 'fa-table',
@@ -76,7 +112,7 @@ define(["./widget"], function(widget) {
             }),
             FunctionCreator({
                 'title': 'Table from CSV FILE',
-                'icon': 'fa-table',
+                'icon': 'fa-file-text',
                 'argument': {
                     file: Argument('File', 'file', validations.v_file),
                     header: Argument('First Row Header', 'checkbox', null),
@@ -97,7 +133,7 @@ define(["./widget"], function(widget) {
             }),
             FunctionCreator({
                 'title': 'Table from CSV URL',
-                'icon': 'fa-table',
+                'icon': 'fa-external-link-square',
                 'argument': {
                     url: Argument('url', null, validations.v_url),
                     header: Argument('First Row Header', 'checkbox', null),
@@ -106,9 +142,41 @@ define(["./widget"], function(widget) {
                 'callback': function() {
                     processURL(this.fnSelected.variable_name, this.inputs, this.widget)
                 }
+            }),
+            FunctionCreator({
+                'title': 'Icon Table',
+                'icon': 'fa-smile-o',
+                'argument': {
+                    icon: Argument('fa-adjust', null, null, 'fa-angle-down', {
+                        style: 'icp icp-auto'
+                    }),
+                    data: Argument('Data', null, null),
+                    //iconTrue: Argument('Icon False', null, null),
+                    //condition:Argument('Condition', null, null),
+                    text: Argument('Text', null, null),
+                },
+                'callback': function() {
+                    var i = this.inputs
+                    var icon = i.icon.value
+                    var text = i.text.value
+                    var data = i.data.value
+                    var f1 = Default_fn(null, [Default_fn("icon", ["smile-o"]), Default_fn("pourcentage", [Variable(data)])])
+                    f1.txt = "[" + f1.txt + "]"
+                    var f = Default_fn("table", [
+
+                        f1, {
+                            col: [text],
+                            grid: 0,
+                            align: "center"
+                        }
+                    ]).txt
+                    this.widget.addToEditorText(this.fnSelected.variable_name, f, true)
+                }
             })
         ]),
-        SubList("Math", [
+        SubList("Array", "fa-list", [{}]),
+        SubList("Filter", "fa-filter", [{}]),
+        SubList("Math", "fa-plus", [
             FunctionCreator({
                 'title': 'sum',
                 'argument': [
@@ -116,19 +184,72 @@ define(["./widget"], function(widget) {
                     Argument('y', null, validations.v_file)
                 ],
                 'callback': function() {
-                    this.widget.addToEditorText(defaut_fn("sum", this.inputs))
+                    this.widget.addToEditorText(null, input_to_fn("sum", this.inputs))
+                }
+            })
+        ]),
+        SubList("Plot", "fa-bar-chart-o", [{}]),
+        SubList("Statistics", "fa-gear", [
+            FunctionCreator({
+                'title': 'Descriptive',
+                'argument': [
+                    Argument('Data', null, null),
+                ],
+                'callback': function() {
+                    this.widget.addToEditorText(null, input_to_fn("descriptive", this.inputs))
                 }
             }),
-            SubList("Stats", [FunctionCreator({
-                'title': 'descriptive',
+            FunctionCreator({
+                'title': 'Mean',
+                'argument': [
+                    Argument('Data', null, null),
+                ],
+                'callback': function() {
+                    this.widget.addToEditorText(this.fnSelected.variable_name, input_to_fn("mean", this.inputs))
+                }
+            }),
+            FunctionCreator({
+                'title': 'Variance',
                 'argument': [
                     Argument('data', null, null),
                 ],
                 'callback': function() {
-                    this.widget.addToEditorText(defaut_fn("descriptive", this.inputs))
+                    this.widget.addToEditorText(null, input_to_fn("mean", this.inputs))
                 }
-            })])
-        ])
+            }),
+            FunctionCreator({
+                'title': 'Mode',
+                'argument': [
+                    Argument('data', null, null),
+                ],
+                'callback': function() {
+                    this.widget.addToEditorText(null, input_to_fn("mean", this.inputs))
+                }
+            }),
+            FunctionCreator({
+                'title': 'Max',
+                'argument': [
+                    Argument('data', null, null),
+                ],
+                'callback': function() {
+                    this.widget.addToEditorText(null, input_to_fn("mean", this.inputs))
+                }
+            }),
+            FunctionCreator({
+                'title': 'Min',
+                'argument': [
+                    Argument('data', null, null),
+                ],
+                'callback': function() {
+                    this.widget.addToEditorText(null, input_to_fn("mean", this.inputs))
+                }
+            }),
+            SubList("Tests", "fa-sitemap", [{}]),
+        ]),
+        SubList("Finance", "fa-usd", [{}]),
+        SubList("Date", "fa-calendar", [{}]),
+        SubList("Text", "fa-italic", [{}]),
+
     ]
 
 
@@ -147,7 +268,7 @@ define(["./widget"], function(widget) {
     }
 
     function valid_char(value) {
-        if (value.length==1) {
+        if (value.length == 1) {
             return value
         } else {
             return undefined;
@@ -204,11 +325,21 @@ define(["./widget"], function(widget) {
         console.log(JSON.stringify(file))
     }
 
-    function defaut_fn(name, arg) {
+    function input_to_fn(name, arg) {
         var txt = name + "("
         arg.forEach(function(e, i) {
-            console.log(JSON.stringify(e))
             txt += e.value
+            if (i != arg.length - 1)
+                txt += ','
+        })
+        txt += ')'
+        return txt
+    }
+
+    function default_fn(name, arg) {
+        var txt = name + "("
+        arg.forEach(function(e, i) {
+            txt += JSON.stringify(e)
             if (i != arg.length - 1)
                 txt += ','
         })

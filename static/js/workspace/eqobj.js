@@ -529,5 +529,6 @@ define(["./mquery"], function(mquery) {
         createMatrix: createMatrix,
         createObject: createObject,
         createArray: createArray,
+        createString:createString,
     }
 })

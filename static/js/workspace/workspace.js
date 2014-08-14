@@ -41,7 +41,7 @@ define([
 
 
     function initComposent(app) {
-
+       
         generator.init(app);
         widget.init(app);
         $("#formulaToggle").click(
