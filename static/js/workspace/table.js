@@ -19,6 +19,15 @@ define([
         }
         this.event = {
             afterChange: function(hook) {
+                var currentdate = new Date(); 
+                var datetime = "Last Sync: " + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds() + "::"
+                + currentdate.getMilliseconds()
+                console.log(currentdate.getMilliseconds())
                 eqobj.addOrChangeValue(hook, exp.copy());
             },
 

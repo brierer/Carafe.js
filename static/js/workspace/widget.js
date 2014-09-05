@@ -188,10 +188,10 @@ define([
                     var nbCol = parseInt(nbcol)
                     var arr = new Array(nbCol);
                     for (var a = []; a.length < 1; a.push(arr.slice(0)));
-                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "data", []), eqobj.createObject([])])
+                    var f = eqobj.createFunction("table", [eqobj.createFunction(name + "Data", []), eqobj.createObject([])])
                     var eqs = eqobj.addEq(name, f)
 
-                    eqobj.addEq(name + "data", eqobj.createMatrix(nbCol, 0));
+                    eqobj.addEq(name + "Data", eqobj.createMatrix(nbCol, 0));
                     eqobj.addShow(name)
                     displayOneTable(table.Table.fromArray(eqs, a, null))
                     setWidget();
