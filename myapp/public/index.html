@@ -30,7 +30,7 @@
 <body>
 
 
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0" ng-cloak>
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
                 <spanx class="sr-only">Toggle navigation
@@ -56,7 +56,13 @@
                 </ul>
                 <!-- /.dropdown-user -->
             </li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" href="watch/1">
+                    <i class="fa fa-arrows-alt fa-fw"></i>
+                </a>
 
+                <!-- /.dropdown-user -->
+            </li>
             <!-- /.dropdown -->
             <li class="dropdown">
                 <a class="btn-warning dropdown-toggle" data-toggle="dropdown" href="#">
@@ -79,7 +85,7 @@
 
     </nav>
 
-   <nav id="formula" class="navbar-default navbar-static-side" role="navigation">
+    <nav id="formula" class="navbar-default navbar-static-side" role="navigation" ng-cloak>
         <div class="sidebar-collapse">
             <ul class="nav" id="side-menu" ng-controller="WizardController">
                 <li class="sidebar-search">
@@ -91,7 +97,7 @@
                             </button>
                         </span>
                     </div>
-                  
+
                 </li>
 
                 <li ng-hide="hide" id="generate-menu" class="sidebar-search">
@@ -109,8 +115,7 @@
 
                                     <span ng-class="((input.type==null) ? 'input-group-addon' : '')">{{input.title}}</span>
                                     <input ng-change="change('asdf')" data-placement="bottomLeft" ng-click="selectedInput(input)" ng-class="[(input.type==null) ? 'form-control' : '', input.param.style,
-                                    ((isSelectedInput (input)) ? 'input-selected': '')]"
-                                     ng-model="input.value" name="input" type="{{input.type}}" smart-float=input.validation smart ng-required="input.type==null" />
+                                    ((isSelectedInput (input)) ? 'input-selected': '')]" ng-model="input.value" name="input" type="{{input.type}}" smart-float=input.validation smart ng-required="input.type==null" />
                                 </ng-form>
                                 <span class="nod_msg" ng-show="innerForm.input.$error.valid">
                                     {{input.validation.msg}}</span>
@@ -126,7 +131,7 @@
 
                     </div>
 
-           
+
                 </li>
 
 
@@ -145,33 +150,26 @@
                 </li>
 
             </ul>
-         
+
         </div>
-    
+
     </nav>
 
- 
 
-    <div id="page-wrapper">
-    <br/>
-        <div ng-if="message!=null" class="alert alert-warning">
-            {{message}}
-        </div>
-     
+
+    <div id="page-wrapper" ng-cloak>
+        <br/>
+
         <form id="editor" method=post action="/book/3" ng-controller="EditorController">
             <input type='hidden' name='csrfmiddlewaretoken' value='9PKyuy0q1fW3fhcwExiYYJsSLjkMiobD' />
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-list-ul fa-fw"></i> Equations
-                    <div class="pull-right">
-                        <a id="btn_eval" ng-click="update()" class="btn_eval btn btn-warning btn-xs">GO!</a>
-                    </div>
                 </div>
                 <input id="id_form_id" name="form_id" type="hidden" value="127.0.0.11404226994.71" />
                 <input id="id_book_id" name="book_id" type="hidden" value="3" />
                 <input id="id_read_only" name="read_only" type="hidden" value="True" />
-                <textarea id="id_equations" name="equations" class="form-control" codeeditor data="onChange">show = show([tablegoal,table(get,{col:[&quot;Depense&quot;,&quot;Septembre&quot;,&quot;Octobre&quot;]})]) tablegoal = table(goal,{col:[&quot;Depense&quot;,&quot;objectif&quot;]}) goal = [[&quot;Loyer&quot;,&quot;Epicerie&quot;,&quot;Resto&quot;,&quot;Alcool&quot;,&quot;Electricite&quot;,&quot;Ecole&quot;],[510,200,100,50,40,166]] get = [[&quot;Loyer&quot;,&quot;Epicerie&quot;,&quot;Resto&quot;,&quot;Alcool&quot;,&quot;Electricite&quot;,&quot;Ecole&quot;], [510,75,105,7,0,0], [510,117,75,0,47,6]]
-
+                <textarea id="id_equations" name="equations" class="form-control" codeeditor data="onChange" es="es">
                 </textarea>
             </div>
         </form>
@@ -179,15 +177,24 @@
 
         <div id="dashboard" class="panel panel-default" ng-controller="WidgetController">
             <div class="panel-heading" ng-click="update()">
-                <i class="fa fa-dashboard fa-fw"></i> Dashboard
+                <i class="fa fa-dashboard fa-fw"></i> Dashboard {{ needUpdate ? "(need update)" : "" }}
                 <div class="pull-right">
-                    <a class="btn_eval btn btn-warning btn-xs" ng-click="update()">GO!</a>
+                    <a class="btn_eval btn btn-warning btn-xs" ng-click="update">GO!</a>
                 </div>
             </div>
             <div id="containment-wrapper" class="panel-body" style="height:1000px">
-                     <div handsontable ng-repeat="widget in widgets" data="widget"></div>
+                <div ng-if="message!=null" class="message alert alert-warning">
+                    {{message}}
+                </div>
+                <div class="table-container ui-widget-content draggable ui-draggable" style="position:relative;" ng-repeat="widget in widgets">
+
+                    <div ng-if="widget.constructor.name == 'Table'" handsontable data="widget"></div>
+                    <div ng-if="widget.constructor.name == 'Plot'" plot data="widget"></div>  
+                </div>
+
+                <div id="invisible-wrapper" ng-show="cs.widget.readOnly || message!=null" class="panel-body" style="height:1000px"></div>
             </div>
-            <div id="invisible-wrapper" ng-show="readOnly_widget.val" class="panel-body" style="height:1000px"></div>
+
         </div>
         <div id="contextMenu" class="dropdown clearfix">
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
@@ -204,10 +211,6 @@
         </div>
     </div>
 
-   <div class="panel-footer">
-                    <button class="btn btn-danger action-destroy">Destroy instances</button>
-                    <button class="btn btn-default action-create">Create instances</button>
-                </div>
     <!-- JavaScript -->
     <script data-main="static/js/workspace/app.js" src="static/js/require.js"></script>
 

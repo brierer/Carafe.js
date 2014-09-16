@@ -1,16 +1,26 @@
 define([
     "jquery",
     "metisMenu",
+    "angular-cookies.min",
+    "./carafeservice",
     "./widget/controller",
     "./editor/controller",
     "./wizard/controller"
 ], function($, metisMenu) {
     $(function() {
         var app = angular.module('myApp', [
+            'ngCookies',
+            'myApp.carafe',
             'myApp.editor',
             'myApp.widget',
             'myApp.wizard',
         ]);
+        app.run(function($rootScope, $http, $cookies) {
+            $rootScope.ready = false;
+            // set the CSRF token here
+            $http.defaults.headers.post['X-CSRFToken'] = $cookies.csrftoken;
+
+        })
         initComposent();
         angular.bootstrap(document, ['myApp'])
         $('#side-menu').metisMenu();

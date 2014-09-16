@@ -14,8 +14,8 @@ requirejs.config({
             //Once loaded, use the global 'Backbone' as the
             //module value.
         },
-        'rickshaw': {
-            deps: ['vendor/d3.layout.min', "bootstrap"],
+        'highcharts': {
+            deps: ['jquery']
         },
         'jquery': {
             deps: ['angular'],
@@ -49,6 +49,9 @@ requirejs.config({
         },
         'angular-mock':{
             deps:['angular']
+        },
+        'angular-cookies.min':{
+            deps:['angular'] 
         }
     },
 

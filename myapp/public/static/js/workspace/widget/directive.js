@@ -1,6 +1,7 @@
 define([
         "jquery.handsontable.full",
-        "./service"
+        "highcharts",
+        "./service",
     ],
     function() {
 
@@ -13,7 +14,7 @@ define([
                 scope: {
                     data: '='
                 },
-                replace: true,
+                replace: false,
                 template: "<div></div>",
                 link: function(scope, elem, attrs) {
                     var table = $(elem).handsontable(scope.data.options)
@@ -24,11 +25,21 @@ define([
                 }
             }
         })
-        app.factory("CarafeService", function() {
+        app.directive('plot', function() {
             return {
-                readOnly_widget: {
-                    val: false
+                restrict: 'A',
+                scope: {
+                    data: '='
+                },
+                replace: false,
+                template: "<div></div>",
+                link: function(scope, elem, attrs) {
+                    console.log(JSON.stringify(scope.data))
+                    var plot =  $(elem).highcharts(scope.data);
+
+                   
                 }
             }
         })
+
     });

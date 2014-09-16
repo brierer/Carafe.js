@@ -12,6 +12,10 @@
     visibility: hidden;
 
 }
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
 
 .input-selected {
 
@@ -39,7 +43,7 @@
 
     background-color: rgba(256, 256, 256, 0.4);
 
-    z-index: 100;
+   
 
 }
 
@@ -202,4 +206,9 @@
 
     color: #a94442;
 
+}
+
+.message{
+    z-index: 2;
+    position: relative;
 }
